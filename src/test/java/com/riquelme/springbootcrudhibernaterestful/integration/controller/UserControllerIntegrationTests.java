@@ -7,6 +7,8 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.Arrays;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -27,6 +29,19 @@ public class UserControllerIntegrationTests {
 
     @MockBean
     private UserService userService;
+
+    @Test
+    public void whenGetAllUsers_thenReturnsUsersList() throws Exception {
+        when(userService.findAll()).thenReturn(Arrays.asList(
+                new User(1L, "John Doe", "john@example.com"),
+                new User(2L, "Jane Doe", "jane@example.com")));
+
+        mockMvc.perform(get("/api/users"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data", hasSize(2)))
+                .andExpect(jsonPath("$.data[0].name", is("John Doe")))
+                .andExpect(jsonPath("$.data[1].name", is("Jane Doe")));
+    }
 
     @Test
     public void whenGetUser_thenReturnsUser() throws Exception {
@@ -69,5 +84,27 @@ public class UserControllerIntegrationTests {
                 .andExpect(status().isNoContent());
     }
 
-    // agregar más pruebas para PUT y manejo de errores específicos.
+    @Test
+    public void whenUpdateUser_thenReturnsUpdatedUser() throws Exception {
+        User updatedUser = new User(1L, "Jane Doe Updated", "janeupdated@example.com");
+        when(userService.update(eq(1L), any(User.class))).thenReturn(updatedUser);
+
+        mockMvc.perform(put("/api/users/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"Jane Doe Updated\",\"email\":\"janeupdated@example.com\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.name", is(updatedUser.getName())))
+                .andExpect(jsonPath("$.data.email", is(updatedUser.getEmail())));
+    }
+
+    @Test
+    public void whenCreateUserWithValidationErrors_thenReturnsBadRequest() throws Exception {
+        mockMvc.perform(post("/api/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"\",\"email\":\"not-an-email\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error", is("hay errores al validar campos.")))
+                .andExpect(jsonPath("$.data.name", is("size must be between 2 and 50")))
+                .andExpect(jsonPath("$.data.email", is("must be a well-formed email address")));
+    }
 }
