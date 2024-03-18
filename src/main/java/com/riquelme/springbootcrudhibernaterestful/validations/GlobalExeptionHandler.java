@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import com.riquelme.springbootcrudhibernaterestful.errors.RoleNotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.errors.UserNotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.responses.ErrorResponse;
 
@@ -33,6 +34,14 @@ public class GlobalExeptionHandler {
     public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException ex, WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
                 env.getProperty("user.error.notfound", "Usuario no encontrado."));
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    // errores especificos con clase especifica
+    @ExceptionHandler(RoleNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleRoleNotFoundException(RoleNotFoundException ex, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                env.getProperty("role.error.notfound", "Rol no encontrado."));
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 

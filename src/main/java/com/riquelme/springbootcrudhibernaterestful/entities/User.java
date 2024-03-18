@@ -1,10 +1,17 @@
 package com.riquelme.springbootcrudhibernaterestful.entities;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
@@ -25,11 +32,17 @@ public class User {
     @Column(name = "email")
     @Email
     private String email;
+    @ManyToMany(cascade = { CascadeType.ALL })
+    @JoinTable(name = "users_roles", joinColumns = { @JoinColumn(name = "user_id") }, inverseJoinColumns = {
+            @JoinColumn(name = "role_id") })
+    private Set<Role> roles;
 
     public User() {
+        roles = new HashSet<Role>();
     }
 
     public User(Long id, String name, String email) {
+        this();
         this.id = id;
         this.name = name;
         this.email = email;
@@ -59,8 +72,17 @@ public class User {
         this.email = email;
     }
 
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+
     @Override
     public String toString() {
-        return "User [id=" + id + ", name=" + name + ", email=" + email + "]";
+        return "User [id=" + id + ", name=" + name + ", email=" + email + ", roles=" + roles + "]";
     }
+
 }
