@@ -38,7 +38,7 @@ public class UserControllerTests {
 
     @BeforeEach
     void setUp() {
-        user = new User(1L, "John Doe", "john.doe@example.com");
+        user = new User(1L, "John Doe", "Jackson","john.doe@example.com", "frD.EFa$");
         userList = Arrays.asList(user);
         when(userService.findAll()).thenReturn(userList);
         when(userService.findById(1L)).thenReturn(user);

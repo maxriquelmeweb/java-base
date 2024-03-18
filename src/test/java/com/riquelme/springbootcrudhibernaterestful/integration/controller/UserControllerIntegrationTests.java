@@ -33,8 +33,8 @@ public class UserControllerIntegrationTests {
     @Test
     public void whenGetAllUsers_thenReturnsUsersList() throws Exception {
         when(userService.findAll()).thenReturn(Arrays.asList(
-                new User(1L, "John Doe", "john@example.com"),
-                new User(2L, "Jane Doe", "jane@example.com")));
+                new User(1L, "John Doe", "Jackson", "john@example.com", "Ea.Pas41"),
+                new User(2L, "Jane Doe", "Smith", "jane@example.com", "Ea.Pas42")));
 
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
@@ -45,7 +45,7 @@ public class UserControllerIntegrationTests {
 
     @Test
     public void whenGetUser_thenReturnsUser() throws Exception {
-        User user = new User(1L, "John Doe", "john@example.com");
+        User user = new User(1L, "John Doe", "Jackson", "john@example.com", "Ea.Pas41");
         when(userService.findById(1L)).thenReturn(user);
 
         mockMvc.perform(get("/api/users/1"))
@@ -65,12 +65,12 @@ public class UserControllerIntegrationTests {
 
     @Test
     public void whenCreateUser_thenReturnsCreatedUser() throws Exception {
-        User user = new User(1L, "Jane Doe", "jane@example.com");
+        User user = new User(1L, "Jane Doe", "Jackson", "jane@example.com", "12345");
         when(userService.save(any(User.class))).thenReturn(user);
 
         mockMvc.perform(post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name\":\"Jane Doe\",\"email\":\"jane@example.com\"}"))
+                .content("{\"name\":\"Jane Doe\",\"lastname\":\"Jackson\",\"email\":\"jane@example.com\",\"password\":\"12345\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.name", is(user.getName())))
                 .andExpect(jsonPath("$.data.email", is(user.getEmail())));
@@ -86,12 +86,12 @@ public class UserControllerIntegrationTests {
 
     @Test
     public void whenUpdateUser_thenReturnsUpdatedUser() throws Exception {
-        User updatedUser = new User(1L, "Jane Doe Updated", "janeupdated@example.com");
+        User updatedUser = new User(1L, "Jane Doe Updated", "Jackson", "janeupdated@example.com", "12345");
         when(userService.update(eq(1L), any(User.class))).thenReturn(updatedUser);
 
         mockMvc.perform(put("/api/users/1")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name\":\"Jane Doe Updated\",\"email\":\"janeupdated@example.com\"}"))
+                .content("{\"name\":\"Jane Doe Updated\",\"lastname\":\"Jackson\",\"email\":\"janeupdated@example.com\",\"password\":\"12345\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.name", is(updatedUser.getName())))
                 .andExpect(jsonPath("$.data.email", is(updatedUser.getEmail())));
@@ -101,10 +101,10 @@ public class UserControllerIntegrationTests {
     public void whenCreateUserWithValidationErrors_thenReturnsBadRequest() throws Exception {
         mockMvc.perform(post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name\":\"\",\"email\":\"not-an-email\"}"))
+                .content("{\"name\":\"\",\"lastname\":\"\",\"email\":\"not-an-email\",\"password\":\"12\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error", is("hay errores al validar campos.")))
-                .andExpect(jsonPath("$.data.name", is("size must be between 2 and 50")))
+                .andExpect(jsonPath("$.data.name", is("must not be blank")))
                 .andExpect(jsonPath("$.data.email", is("must be a well-formed email address")));
     }
 }

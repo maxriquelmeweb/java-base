@@ -1,5 +1,6 @@
 package com.riquelme.springbootcrudhibernaterestful.services;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -42,7 +43,11 @@ public class UserServiceImpl implements UserService {
     public User update(Long id, User user) {
         User userDb = findById(id);
         userDb.setName(user.getName());
+        userDb.setLastname(user.getLastname());
         userDb.setEmail(user.getEmail());
+        userDb.setActive(user.getActive());
+        userDb.setCreated_at(user.getCreated_at());
+        userDb.setUpdated_at(new Date());
         return userRepository.save(userDb);
     }
 
@@ -51,5 +56,11 @@ public class UserServiceImpl implements UserService {
     public void deleteById(Long id) {
         User userDb = findById(id);
         userRepository.delete(userDb);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
     }
 }
