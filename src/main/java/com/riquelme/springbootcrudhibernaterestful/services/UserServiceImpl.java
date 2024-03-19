@@ -1,13 +1,13 @@
 package com.riquelme.springbootcrudhibernaterestful.services;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
-import com.riquelme.springbootcrudhibernaterestful.errors.UserNotFoundException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.ResourceNotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.repositories.UserRepository;
 
 @Service
@@ -29,7 +29,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("user.error.notfound"));
     }
 
     @Transactional
@@ -46,8 +46,7 @@ public class UserServiceImpl implements UserService {
         userDb.setLastname(user.getLastname());
         userDb.setEmail(user.getEmail());
         userDb.setActive(user.getActive());
-        userDb.setCreated_at(user.getCreated_at());
-        userDb.setUpdated_at(new Date());
+        userDb.setUpdated_at(LocalDateTime.now());
         return userRepository.save(userDb);
     }
 

@@ -17,9 +17,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 
 import com.riquelme.springbootcrudhibernaterestful.controllers.UserController;
-import com.riquelme.springbootcrudhibernaterestful.dtos.messageResponse.MessageResponse;
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
+import com.riquelme.springbootcrudhibernaterestful.responses.MessageResponse;
 import com.riquelme.springbootcrudhibernaterestful.services.UserService;
+
 
 @SpringBootTest
 public class UserControllerTests {

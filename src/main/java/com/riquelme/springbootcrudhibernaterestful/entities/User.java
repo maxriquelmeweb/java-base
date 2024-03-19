@@ -1,8 +1,11 @@
 package com.riquelme.springbootcrudhibernaterestful.entities;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.riquelme.springbootcrudhibernaterestful.validations.ExistsByEmail;
@@ -17,52 +20,54 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "users")
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "id", nullable = false)
     private Long id;
 
     @NotBlank
     @Size(min = 2, max = 100)
-    @Column(name = "name")
+    @Column(name = "name", nullable = false, length = 100)
     private String name;
 
     @NotBlank
     @Size(min = 2, max = 100)
-    @Column(name = "lastname")
+    @Column(name = "lastname", nullable = false, length = 100)
     private String lastname;
 
     @NotBlank
-    @ExistsByEmail
-    @Size(min = 2, max = 100)
-    @Column(name = "email")
     @Email
+    @ExistsByEmail()
+    @Size(min = 5, max = 100)
+    @Column(name = "email", nullable = false, length = 100, unique = true)
     private String email;
 
     @NotBlank
-    @Column(name = "password")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Column(name = "password", nullable = false, length = 250)
     private String password;
 
-    @Column(name = "active", columnDefinition = "boolean default true")
+    @NotNull
+    @Column(name = "active", nullable = false, columnDefinition = "boolean default true")
     private Boolean active;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date created_at;
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime created_at;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updated_at;
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updated_at;
 
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(name = "users_roles", joinColumns = { @JoinColumn(name = "user_id") }, inverseJoinColumns = {
@@ -71,14 +76,8 @@ public class User {
 
     @PrePersist
     public void prePersist() {
-        active = true;
-        created_at = new Date();
-        updated_at = new Date();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updated_at = new Date();
+        created_at = LocalDateTime.now();
+        updated_at = LocalDateTime.now();
     }
 
     public User() {
@@ -87,7 +86,7 @@ public class User {
 
     public User(Long id, @NotBlank @Size(min = 2, max = 100) String name,
             @NotBlank @Size(min = 2, max = 100) String lastname,
-            @NotBlank @Size(min = 2, max = 100) @Email String email, @NotBlank String password) {
+            @NotBlank @Email @Size(min = 5, max = 100) String email, @NotBlank String password) {
         this();
         this.id = id;
         this.name = name;
@@ -144,19 +143,19 @@ public class User {
         this.active = active;
     }
 
-    public Date getCreated_at() {
+    public LocalDateTime getCreated_at() {
         return created_at;
     }
 
-    public void setCreated_at(Date created_at) {
+    public void setCreated_at(LocalDateTime created_at) {
         this.created_at = created_at;
     }
 
-    public Date getUpdated_at() {
+    public LocalDateTime getUpdated_at() {
         return updated_at;
     }
 
-    public void setUpdated_at(Date updated_at) {
+    public void setUpdated_at(LocalDateTime updated_at) {
         this.updated_at = updated_at;
     }
 

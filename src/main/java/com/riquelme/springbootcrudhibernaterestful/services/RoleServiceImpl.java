@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.riquelme.springbootcrudhibernaterestful.entities.Role;
-import com.riquelme.springbootcrudhibernaterestful.errors.RoleNotFoundException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.ResourceNotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.repositories.RoleRepository;
 
 @Service
@@ -28,7 +28,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Role findById(Long id) {
         return roleRepository.findById(id)
-                .orElseThrow(() -> new RoleNotFoundException("Usuario no encontrado con ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("role.error.notfound"));
     }
 
     @Transactional

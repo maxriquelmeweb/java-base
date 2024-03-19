@@ -18,7 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.riquelme.springbootcrudhibernaterestful.controllers.UserController;
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
-import com.riquelme.springbootcrudhibernaterestful.errors.UserNotFoundException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.ResourceNotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.services.UserService;
 
 @WebMvcTest(UserController.class)
@@ -56,7 +56,7 @@ public class UserControllerIntegrationTests {
 
     @Test
     public void whenGetUserNotFound_thenReturns404() throws Exception {
-        when(userService.findById(anyLong())).thenThrow(new UserNotFoundException("Usuario no encontrado."));
+        when(userService.findById(anyLong())).thenThrow(new ResourceNotFoundException("Usuario no encontrado."));
 
         mockMvc.perform(get("/api/users/999"))
                 .andExpect(status().isNotFound())
