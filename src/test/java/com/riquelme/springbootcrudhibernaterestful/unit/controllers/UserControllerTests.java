@@ -17,9 +17,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 
 import com.riquelme.springbootcrudhibernaterestful.controllers.UserController;
-import com.riquelme.springbootcrudhibernaterestful.dtos.messageResponse.MessageResponse;
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
+import com.riquelme.springbootcrudhibernaterestful.responses.MessageResponse;
 import com.riquelme.springbootcrudhibernaterestful.services.UserService;
+
 
 @SpringBootTest
 public class UserControllerTests {
@@ -38,7 +39,7 @@ public class UserControllerTests {
 
     @BeforeEach
     void setUp() {
-        user = new User(1L, "John Doe", "john.doe@example.com");
+        user = new User(1L, "John Doe", "Jackson","john.doe@example.com", "frD.EFa$");
         userList = Arrays.asList(user);
         when(userService.findAll()).thenReturn(userList);
         when(userService.findById(1L)).thenReturn(user);

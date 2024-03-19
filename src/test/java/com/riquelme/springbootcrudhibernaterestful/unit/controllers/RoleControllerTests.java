@@ -17,9 +17,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 
 import com.riquelme.springbootcrudhibernaterestful.controllers.RoleController;
-import com.riquelme.springbootcrudhibernaterestful.dtos.messageResponse.MessageResponse;
 import com.riquelme.springbootcrudhibernaterestful.entities.Role;
+import com.riquelme.springbootcrudhibernaterestful.responses.MessageResponse;
 import com.riquelme.springbootcrudhibernaterestful.services.RoleService;
+
 
 @SpringBootTest
 public class RoleControllerTests {
