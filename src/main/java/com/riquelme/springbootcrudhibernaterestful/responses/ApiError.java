@@ -1,24 +1,24 @@
 package com.riquelme.springbootcrudhibernaterestful.responses;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ApiError {
-    private List<String> errors;
+    private Map<String, String> fieldErrors;
 
     public ApiError() {
-        this.errors = new ArrayList<>();
+        this.fieldErrors = new HashMap<>();
     }
 
-    public void addError(String error) {
-        this.errors.add(error);
+    public void addFieldError(String field, String error) {
+        this.fieldErrors.put(field, error);
     }
 
-    public List<String> getErrors() {
-        return errors;
+    public Map<String, String> getFieldErrors() {
+        return fieldErrors;
     }
 
-    public void setErrors(List<String> errors) {
-        this.errors = errors;
+    public void setFieldErrors(Map<String, String> fieldErrors) {
+        this.fieldErrors = fieldErrors;
     }
 }

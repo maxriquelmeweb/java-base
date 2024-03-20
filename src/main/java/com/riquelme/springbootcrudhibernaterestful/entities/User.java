@@ -86,13 +86,14 @@ public class User {
 
     public User(Long id, @NotBlank @Size(min = 2, max = 100) String name,
             @NotBlank @Size(min = 2, max = 100) String lastname,
-            @NotBlank @Email @Size(min = 5, max = 100) String email, @NotBlank String password) {
-        this();
+            @NotBlank @Email @Size(min = 5, max = 100) String email, @NotBlank String password,
+            @NotNull Boolean active) {
         this.id = id;
         this.name = name;
         this.lastname = lastname;
         this.email = email;
         this.password = password;
+        this.active = active;
     }
 
     public Long getId() {

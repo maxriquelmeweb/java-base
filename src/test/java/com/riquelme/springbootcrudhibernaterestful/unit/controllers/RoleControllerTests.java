@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 
@@ -20,7 +21,6 @@ import com.riquelme.springbootcrudhibernaterestful.controllers.RoleController;
 import com.riquelme.springbootcrudhibernaterestful.entities.Role;
 import com.riquelme.springbootcrudhibernaterestful.responses.MessageResponse;
 import com.riquelme.springbootcrudhibernaterestful.services.RoleService;
-
 
 @SpringBootTest
 public class RoleControllerTests {
@@ -30,6 +30,9 @@ public class RoleControllerTests {
 
     @Mock
     private BindingResult bindingResult;
+
+    @Mock
+    private MessageSource messageSource;
 
     @InjectMocks
     private RoleController roleController;

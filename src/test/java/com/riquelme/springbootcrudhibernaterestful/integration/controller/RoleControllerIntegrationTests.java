@@ -8,20 +8,26 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.riquelme.springbootcrudhibernaterestful.controllers.RoleController;
 import com.riquelme.springbootcrudhibernaterestful.entities.Role;
 import com.riquelme.springbootcrudhibernaterestful.exceptions.ResourceNotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.services.RoleService;
 
-@WebMvcTest(RoleController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@PropertySource("classpath:config.properties")
 public class RoleControllerIntegrationTests {
 
         @Autowired
@@ -29,6 +35,12 @@ public class RoleControllerIntegrationTests {
 
         @MockBean
         private RoleService roleService;
+
+        @Autowired
+        private MessageSource messageSource;
+
+        @Value("${set.locale.test}")
+        private String defaultLocale;
 
         @Test
         public void whenGetAllRoles_thenReturnsRolesList() throws Exception {
@@ -54,15 +66,6 @@ public class RoleControllerIntegrationTests {
         }
 
         @Test
-        public void whenGetRoleNotFound_thenReturns404() throws Exception {
-                when(roleService.findById(anyLong())).thenThrow(new ResourceNotFoundException("Rol no encontrado."));
-
-                mockMvc.perform(get("/api/roles/999"))
-                                .andExpect(status().isNotFound())
-                                .andExpect(jsonPath("$.message", is("Rol no encontrado.")));
-        }
-
-        @Test
         public void whenCreateRole_thenReturnsCreatedRole() throws Exception {
                 Role role = new Role(1L, "Admin");
                 when(roleService.save(any(Role.class))).thenReturn(role);
@@ -72,14 +75,6 @@ public class RoleControllerIntegrationTests {
                                 .content("{\"name\":\"Admin\"}"))
                                 .andExpect(status().isCreated())
                                 .andExpect(jsonPath("$.data.name", is(role.getName())));
-        }
-
-        @Test
-        public void whenDeleteRole_thenReturns204() throws Exception {
-                doNothing().when(roleService).deleteById(1L);
-
-                mockMvc.perform(delete("/api/roles/1"))
-                                .andExpect(status().isNoContent());
         }
 
         @Test
@@ -95,13 +90,34 @@ public class RoleControllerIntegrationTests {
         }
 
         @Test
+        public void whenDeleteRole_thenReturns204() throws Exception {
+                doNothing().when(roleService).deleteById(1L);
+
+                mockMvc.perform(delete("/api/roles/1"))
+                                .andExpect(status().isNoContent());
+        }
+
+        @Test
+        public void whenGetRoleNotFound_thenReturns404() throws Exception {
+                Locale esLocale = new Locale.Builder().setLanguageTag(defaultLocale).build();
+                String roleNotFoundMessage = messageSource.getMessage("role.error.notfound", null, esLocale);
+                when(roleService.findById(anyLong())).thenThrow(new ResourceNotFoundException("role.error.notfound"));
+                mockMvc.perform(get("/api/roles/999"))
+                                .andExpect(status().isNotFound())
+                                .andExpect(jsonPath("$.message", is(roleNotFoundMessage)));
+
+        }
+
+        @Test
         public void whenCreateRoleWithValidationErrors_thenReturnsBadRequest() throws Exception {
+                Locale esLocale = new Locale.Builder().setLanguageTag(defaultLocale).build();
+                String handleValidationErrorsMessage = messageSource.getMessage("handleValidationErrors.fails", null,
+                                esLocale);
                 mockMvc.perform(post("/api/roles")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("{\"name\":\"\"}"))
                                 .andExpect(status().isBadRequest())
-                                .andExpect(jsonPath("$.error", is("hay errores al validar campos.")))
-                                .andExpect(jsonPath("$.data.name", is("size must be between 2 and 50")));
+                                .andExpect(jsonPath("$.message", is(handleValidationErrorsMessage)));
         }
 
 }
