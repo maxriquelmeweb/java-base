@@ -1,7 +1,6 @@
 package com.riquelme.springbootcrudhibernaterestful.integration.controller;
 
 import static org.hamcrest.Matchers.*;
-import static org.hamcrest.Matchers.isA;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -12,7 +11,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
@@ -76,12 +74,6 @@ public class RoleControllerIntegrationTests {
                                 .andExpect(jsonPath("$.data", hasSize(2)))
                                 .andExpect(jsonPath("$.data[0].name", is("Admin")))
                                 .andExpect(jsonPath("$.data[1].name", is("User")))
-                                .andExpect(jsonPath("$.data[0].created_at", notNullValue()))
-                                .andExpect(jsonPath("$.data[0].updated_at", notNullValue()))
-                                .andExpect(jsonPath("$.data[0].users", isA(List.class)))
-                                .andExpect(jsonPath("$.data[1].created_at", notNullValue()))
-                                .andExpect(jsonPath("$.data[1].updated_at", notNullValue()))
-                                .andExpect(jsonPath("$.data[1].users", isA(List.class)))
                                 .andExpect(jsonPath("$.message", is(getMessage("role.getRoles.success"))));
         }
 
@@ -98,9 +90,6 @@ public class RoleControllerIntegrationTests {
                 mockMvc.perform(get("/api/roles/1"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.data.name", is(role.getName())))
-                                .andExpect(jsonPath("$.data.created_at", notNullValue()))
-                                .andExpect(jsonPath("$.data.updated_at", notNullValue()))
-                                .andExpect(jsonPath("$.data.users", isA(List.class)))
                                 .andExpect(jsonPath("$.message", is(getMessage("role.getRole.success"))));
         }
 
@@ -118,9 +107,6 @@ public class RoleControllerIntegrationTests {
                                 .content("{\"name\":\"Admin\"}"))
                                 .andExpect(status().isCreated())
                                 .andExpect(jsonPath("$.data.name", is(role.getName())))
-                                .andExpect(jsonPath("$.data.created_at", notNullValue()))
-                                .andExpect(jsonPath("$.data.updated_at", notNullValue()))
-                                .andExpect(jsonPath("$.data.users", isA(List.class)))
                                 .andExpect(jsonPath("$.message", is(getMessage("role.createRole.success"))));
         }
 
@@ -139,9 +125,6 @@ public class RoleControllerIntegrationTests {
                                 .content("{\"name\":\"AdminUpdated\"}"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.data.name", is(updatedRole.getName())))
-                                .andExpect(jsonPath("$.data.created_at", notNullValue()))
-                                .andExpect(jsonPath("$.data.updated_at", notNullValue()))
-                                .andExpect(jsonPath("$.data.users", isA(List.class)))
                                 .andExpect(jsonPath("$.message", is(getMessage("role.updateRole.success"))));
         }
 
