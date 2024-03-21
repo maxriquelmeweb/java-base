@@ -88,4 +88,5 @@ public class UserControllerTests {
         ResponseEntity<?> response = userController.deleteUser(1L);
         assertEquals(NO_CONTENT, response.getStatusCode());
     }
+
 }
