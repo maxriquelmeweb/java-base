@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 
@@ -20,7 +21,6 @@ import com.riquelme.springbootcrudhibernaterestful.controllers.UserController;
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
 import com.riquelme.springbootcrudhibernaterestful.responses.MessageResponse;
 import com.riquelme.springbootcrudhibernaterestful.services.UserService;
-
 
 @SpringBootTest
 public class UserControllerTests {
@@ -31,6 +31,9 @@ public class UserControllerTests {
     @Mock
     private BindingResult bindingResult;
 
+    @Mock
+    private MessageSource messageSource;
+
     @InjectMocks
     private UserController userController;
 
@@ -39,7 +42,7 @@ public class UserControllerTests {
 
     @BeforeEach
     void setUp() {
-        user = new User(1L, "John Doe", "Jackson","john.doe@example.com", "frD.EFa$");
+        user = new User(1L, "John Doe", "Jackson", "john.doe@example.com", "frD.EFa$", true);
         userList = Arrays.asList(user);
         when(userService.findAll()).thenReturn(userList);
         when(userService.findById(1L)).thenReturn(user);
@@ -85,4 +88,5 @@ public class UserControllerTests {
         ResponseEntity<?> response = userController.deleteUser(1L);
         assertEquals(NO_CONTENT, response.getStatusCode());
     }
+
 }

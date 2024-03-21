@@ -1,27 +1,38 @@
 package com.riquelme.springbootcrudhibernaterestful.integration.controller;
 
 import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.isA;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.riquelme.springbootcrudhibernaterestful.controllers.RoleController;
 import com.riquelme.springbootcrudhibernaterestful.entities.Role;
 import com.riquelme.springbootcrudhibernaterestful.exceptions.ResourceNotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.services.RoleService;
 
-@WebMvcTest(RoleController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@PropertySource("classpath:config.properties")
 public class RoleControllerIntegrationTests {
 
         @Autowired
@@ -30,68 +41,125 @@ public class RoleControllerIntegrationTests {
         @MockBean
         private RoleService roleService;
 
+        @Autowired
+        private MessageSource messageSource;
+
+        @Value("${set.locale.test}")
+        private String defaultLocale;
+
+        private String getMessage(String messageKey) {
+                Locale esLocale = new Locale.Builder().setLanguageTag(defaultLocale).build();
+                String resultMessage = messageSource.getMessage(messageKey, null, esLocale);
+                return resultMessage;
+        }
+
         @Test
         public void whenGetAllRoles_thenReturnsRolesList() throws Exception {
-                when(roleService.findAll()).thenReturn(Arrays.asList(
-                                new Role(1L, "Admin"),
-                                new Role(2L, "User")));
+                Role adminRole = new Role(1L, "Admin");
+                adminRole.setCreated_at(
+                                LocalDateTime.parse("2024-03-20T20:31:36.646439", DateTimeFormatter.ISO_DATE_TIME));
+                adminRole.setUpdated_at(
+                                LocalDateTime.parse("2024-03-20T20:31:36.646439", DateTimeFormatter.ISO_DATE_TIME));
+                adminRole.setUsers(new HashSet<>());
+
+                Role userRole = new Role(2L, "User");
+                userRole.setCreated_at(
+                                LocalDateTime.parse("2024-03-20T20:33:04.279875", DateTimeFormatter.ISO_DATE_TIME));
+                userRole.setUpdated_at(
+                                LocalDateTime.parse("2024-03-20T20:33:04.279875", DateTimeFormatter.ISO_DATE_TIME));
+                userRole.setUsers(new HashSet<>());
+
+                when(roleService.findAll()).thenReturn(Arrays.asList(adminRole, userRole));
 
                 mockMvc.perform(get("/api/roles"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.data", hasSize(2)))
                                 .andExpect(jsonPath("$.data[0].name", is("Admin")))
-                                .andExpect(jsonPath("$.data[1].name", is("User")));
+                                .andExpect(jsonPath("$.data[1].name", is("User")))
+                                .andExpect(jsonPath("$.data[0].created_at", notNullValue()))
+                                .andExpect(jsonPath("$.data[0].updated_at", notNullValue()))
+                                .andExpect(jsonPath("$.data[0].users", isA(List.class)))
+                                .andExpect(jsonPath("$.data[1].created_at", notNullValue()))
+                                .andExpect(jsonPath("$.data[1].updated_at", notNullValue()))
+                                .andExpect(jsonPath("$.data[1].users", isA(List.class)))
+                                .andExpect(jsonPath("$.message", is(getMessage("role.getRoles.success"))));
         }
 
         @Test
         public void whenGetRole_thenReturnsRole() throws Exception {
                 Role role = new Role(1L, "Admin");
-                when(roleService.findById(1L)).thenReturn(role);
+                role.setCreated_at(
+                                LocalDateTime.parse("2024-03-20T20:31:36.646439", DateTimeFormatter.ISO_DATE_TIME));
+                role.setUpdated_at(
+                                LocalDateTime.parse("2024-03-20T20:31:36.646439", DateTimeFormatter.ISO_DATE_TIME));
+                role.setUsers(new HashSet<>());
 
+                when(roleService.findById(1L)).thenReturn(role);
                 mockMvc.perform(get("/api/roles/1"))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.data.name", is(role.getName())));
-        }
-
-        @Test
-        public void whenGetRoleNotFound_thenReturns404() throws Exception {
-                when(roleService.findById(anyLong())).thenThrow(new ResourceNotFoundException("Rol no encontrado."));
-
-                mockMvc.perform(get("/api/roles/999"))
-                                .andExpect(status().isNotFound())
-                                .andExpect(jsonPath("$.message", is("Rol no encontrado.")));
+                                .andExpect(jsonPath("$.data.name", is(role.getName())))
+                                .andExpect(jsonPath("$.data.created_at", notNullValue()))
+                                .andExpect(jsonPath("$.data.updated_at", notNullValue()))
+                                .andExpect(jsonPath("$.data.users", isA(List.class)))
+                                .andExpect(jsonPath("$.message", is(getMessage("role.getRole.success"))));
         }
 
         @Test
         public void whenCreateRole_thenReturnsCreatedRole() throws Exception {
                 Role role = new Role(1L, "Admin");
+                role.setCreated_at(LocalDateTime.parse("2024-03-20T20:31:36.646439", DateTimeFormatter.ISO_DATE_TIME));
+                role.setUpdated_at(LocalDateTime.parse("2024-03-20T20:31:36.646439", DateTimeFormatter.ISO_DATE_TIME));
+                role.setUsers(new HashSet<>());
+
                 when(roleService.save(any(Role.class))).thenReturn(role);
 
                 mockMvc.perform(post("/api/roles")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("{\"name\":\"Admin\"}"))
                                 .andExpect(status().isCreated())
-                                .andExpect(jsonPath("$.data.name", is(role.getName())));
+                                .andExpect(jsonPath("$.data.name", is(role.getName())))
+                                .andExpect(jsonPath("$.data.created_at", notNullValue()))
+                                .andExpect(jsonPath("$.data.updated_at", notNullValue()))
+                                .andExpect(jsonPath("$.data.users", isA(List.class)))
+                                .andExpect(jsonPath("$.message", is(getMessage("role.createRole.success"))));
+        }
+
+        @Test
+        public void whenUpdateRole_thenReturnsUpdatedRole() throws Exception {
+                Role updatedRole = new Role(1L, "AdminUpdated");
+                updatedRole.setCreated_at(
+                                LocalDateTime.parse("2024-03-20T20:31:36.646439", DateTimeFormatter.ISO_DATE_TIME));
+                updatedRole.setUpdated_at(LocalDateTime.now());
+                updatedRole.setUsers(new HashSet<>());
+
+                when(roleService.update(eq(1L), any(Role.class))).thenReturn(updatedRole);
+
+                mockMvc.perform(put("/api/roles/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"name\":\"AdminUpdated\"}"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.data.name", is(updatedRole.getName())))
+                                .andExpect(jsonPath("$.data.created_at", notNullValue()))
+                                .andExpect(jsonPath("$.data.updated_at", notNullValue()))
+                                .andExpect(jsonPath("$.data.users", isA(List.class)))
+                                .andExpect(jsonPath("$.message", is(getMessage("role.updateRole.success"))));
         }
 
         @Test
         public void whenDeleteRole_thenReturns204() throws Exception {
                 doNothing().when(roleService).deleteById(1L);
-
                 mockMvc.perform(delete("/api/roles/1"))
-                                .andExpect(status().isNoContent());
+                                .andExpect(status().isNoContent())
+                                .andExpect(jsonPath("$.data").doesNotExist());
         }
 
         @Test
-        public void whenUpdateRole_thenReturnsUpdatedRole() throws Exception {
-                Role updatedRole = new Role(1L, "Admin");
-                when(roleService.update(eq(1L), any(Role.class))).thenReturn(updatedRole);
-
-                mockMvc.perform(put("/api/roles/1")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"Admin\"}"))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.data.name", is(updatedRole.getName())));
+        public void whenGetRoleNotFound_thenReturns404() throws Exception {
+                when(roleService.findById(anyLong())).thenThrow(new ResourceNotFoundException("role.error.notfound"));
+                mockMvc.perform(get("/api/roles/999"))
+                                .andExpect(status().isNotFound())
+                                .andExpect(jsonPath("$.message", is(getMessage("role.error.notfound"))))
+                                .andExpect(jsonPath("$.data").doesNotExist());
         }
 
         @Test
@@ -100,8 +168,8 @@ public class RoleControllerIntegrationTests {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("{\"name\":\"\"}"))
                                 .andExpect(status().isBadRequest())
-                                .andExpect(jsonPath("$.error", is("hay errores al validar campos.")))
-                                .andExpect(jsonPath("$.data.name", is("size must be between 2 and 50")));
+                                .andExpect(jsonPath("$.message", is(getMessage("handleValidationErrors.fails"))))
+                                .andExpect(jsonPath("$.data").exists());
         }
 
 }

@@ -3,6 +3,7 @@ package com.riquelme.springbootcrudhibernaterestful.controllers;
 import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 
 import com.riquelme.springbootcrudhibernaterestful.responses.ApiError;
 import com.riquelme.springbootcrudhibernaterestful.responses.MessageResponse;
@@ -18,9 +19,12 @@ abstract class BaseController {
 
     protected ResponseEntity<MessageResponse> handleValidationErrors(BindingResult result) {
         ApiError apiError = new ApiError();
-        result.getFieldErrors().forEach(error -> apiError.addError(error.getDefaultMessage()));
+        for (FieldError fieldError : result.getFieldErrors()) {
+            apiError.addFieldError(fieldError.getField(), fieldError.getDefaultMessage());
+        }
+
         return ResponseEntity.badRequest()
-                .body(new MessageResponseImpl(messageSource, "handleValidationErrors.fails", apiError.getErrors(),
+                .body(new MessageResponseImpl(messageSource, "handleValidationErrors.fails", apiError.getFieldErrors(),
                         null));
     }
 }
