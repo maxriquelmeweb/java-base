@@ -72,15 +72,11 @@ public class UserControllerIntegrationTests {
                                 .andExpect(jsonPath("$.data[0].lastname", is("Jackson")))
                                 .andExpect(jsonPath("$.data[0].email", is("john@example.com")))
                                 .andExpect(jsonPath("$.data[0].active", is(true)))
-                                .andExpect(jsonPath("$.data[0].created_at", notNullValue()))
-                                .andExpect(jsonPath("$.data[0].updated_at", notNullValue()))
                                 .andExpect(jsonPath("$.data[0].roles", isA(List.class)))
                                 .andExpect(jsonPath("$.data[1].name", is("Jane Doe")))
                                 .andExpect(jsonPath("$.data[1].lastname", is("Smith")))
                                 .andExpect(jsonPath("$.data[1].email", is("jane@example.com")))
                                 .andExpect(jsonPath("$.data[1].active", is(true)))
-                                .andExpect(jsonPath("$.data[1].created_at", notNullValue()))
-                                .andExpect(jsonPath("$.data[1].updated_at", notNullValue()))
                                 .andExpect(jsonPath("$.data[1].roles", isA(List.class)))
                                 .andExpect(jsonPath("$.message", is(getMessage("user.getUsers.success"))));
         }
@@ -100,8 +96,6 @@ public class UserControllerIntegrationTests {
                                 .andExpect(jsonPath("$.data.lastname", is("Jackson")))
                                 .andExpect(jsonPath("$.data.email", is("john@example.com")))
                                 .andExpect(jsonPath("$.data.active", is(true)))
-                                .andExpect(jsonPath("$.data.created_at", notNullValue()))
-                                .andExpect(jsonPath("$.data.updated_at", notNullValue()))
                                 .andExpect(jsonPath("$.data.roles", isA(List.class)))
                                 .andExpect(jsonPath("$.message", is(getMessage("user.getUser.success"))));
         }
@@ -123,8 +117,6 @@ public class UserControllerIntegrationTests {
                                 .andExpect(jsonPath("$.data.lastname", is("Jackson")))
                                 .andExpect(jsonPath("$.data.email", is(user.getEmail())))
                                 .andExpect(jsonPath("$.data.active", is(true)))
-                                .andExpect(jsonPath("$.data.created_at", notNullValue()))
-                                .andExpect(jsonPath("$.data.updated_at", notNullValue()))
                                 .andExpect(jsonPath("$.data.roles", isA(List.class)))
                                 .andExpect(jsonPath("$.message", is(getMessage("user.createUser.success"))));
         }
@@ -147,8 +139,6 @@ public class UserControllerIntegrationTests {
                                 .andExpect(jsonPath("$.data.lastname", is("Jackson")))
                                 .andExpect(jsonPath("$.data.email", is(updatedUser.getEmail())))
                                 .andExpect(jsonPath("$.data.active", is(true)))
-                                .andExpect(jsonPath("$.data.created_at", notNullValue()))
-                                .andExpect(jsonPath("$.data.updated_at", notNullValue()))
                                 .andExpect(jsonPath("$.data.roles", isA(List.class)))
                                 .andExpect(jsonPath("$.message", is(getMessage("user.updateUser.success"))));
         }

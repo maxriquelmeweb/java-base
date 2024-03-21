@@ -1,6 +1,7 @@
 package com.riquelme.springbootcrudhibernaterestful.controllers;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -15,10 +16,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.riquelme.springbootcrudhibernaterestful.dtos.UserDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
 import com.riquelme.springbootcrudhibernaterestful.responses.MessageResponse;
 import com.riquelme.springbootcrudhibernaterestful.responses.MessageResponseImpl;
 import com.riquelme.springbootcrudhibernaterestful.services.UserService;
+import com.riquelme.springbootcrudhibernaterestful.util.EntityDtoMapper;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -37,13 +40,18 @@ public class UserController extends BaseController {
     @GetMapping
     public ResponseEntity<MessageResponse> getUsers() {
         List<User> users = userService.findAll();
-        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "user.getUsers.success", users, null));
+        List<UserDTO> userDTOs = users.stream()
+                .map(user -> EntityDtoMapper.convertToDTO(user, UserDTO.class))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "user.getUsers.success", userDTOs, null));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MessageResponse> getUser(@PathVariable @Min(1) Long id) {
         User user = userService.findById(id);
-        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "user.getUser.success", user, null));
+        return ResponseEntity
+                .ok(new MessageResponseImpl(messageSource, "user.getUser.success",
+                        EntityDtoMapper.convertToDTO(user, UserDTO.class), null));
     }
 
     @PostMapping
@@ -53,7 +61,9 @@ public class UserController extends BaseController {
         }
         User newUser = userService.save(user);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new MessageResponseImpl(messageSource, "user.createUser.success", newUser, null));
+                .body(new MessageResponseImpl(messageSource, "user.createUser.success",
+                        EntityDtoMapper.convertToDTO(newUser, UserDTO.class),
+                        null));
     }
 
     @PutMapping("/{id}")
@@ -64,7 +74,9 @@ public class UserController extends BaseController {
         }
         User updateUser = userService.update(id, user);
         return ResponseEntity
-                .ok(new MessageResponseImpl(messageSource, "user.updateUser.success", updateUser, null));
+                .ok(new MessageResponseImpl(messageSource, "user.updateUser.success",
+                        EntityDtoMapper.convertToDTO(updateUser, UserDTO.class),
+                        null));
     }
 
     @DeleteMapping("/{id}")
