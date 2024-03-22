@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
         if (user.getPassword() != null) {
             userDb.setPassword(user.getPassword());
         }
-        userDb.setUpdated_at(LocalDateTime.now());
+        userDb.setUpdatedAt(LocalDateTime.now());
         return userRepository.save(userDb);
     }
 

@@ -16,10 +16,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Entidad que representa un rol en el sistema.
+ */
 @Entity
 @Table(name = "roles")
 public class Role {
@@ -30,26 +34,33 @@ public class Role {
     private Long id;
 
     @Size(min = 2, max = 50)
-    @ExistsByNameRole()
+    @ExistsByNameRole() // Validación personalizada para verificar si el nombre del rol ya existe en la base de datos.
     @NotBlank
     @Column(name = "name", nullable = false, length = 50, unique = true)
     private String name;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updated_at;
+    private LocalDateTime updatedAt;
 
-    @ManyToMany(mappedBy = "roles")
+    @ManyToMany(mappedBy = "roles") // Define la relación muchos a muchos con la entidad User.
     Set<User> users;
 
     @PrePersist
     public void prePersist() {
-        created_at = LocalDateTime.now();
-        updated_at = LocalDateTime.now();
+        // Establece createdAt y updatedAt a la fecha y hora actual antes de persistir.
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        // Actualiza updatedAt a la fecha y hora actual antes de actualizar.
+        updatedAt = LocalDateTime.now();
     }
 
     public Role() {
@@ -78,20 +89,20 @@ public class Role {
         this.name = name;
     }
 
-    public LocalDateTime getCreated_at() {
-        return created_at;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreated_at(LocalDateTime created_at) {
-        this.created_at = created_at;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public LocalDateTime getUpdated_at() {
-        return updated_at;
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 
-    public void setUpdated_at(LocalDateTime updated_at) {
-        this.updated_at = updated_at;
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public Set<User> getUsers() {
@@ -104,7 +115,7 @@ public class Role {
 
     @Override
     public String toString() {
-        return "Role [id=" + id + ", name=" + name + ", created_at=" + created_at + ", updated_at=" + updated_at
+        return "Role [id=" + id + ", name=" + name + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt
                 + ", users=" + users + "]";
     }
 

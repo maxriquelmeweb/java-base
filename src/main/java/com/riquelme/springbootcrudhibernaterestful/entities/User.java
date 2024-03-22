@@ -10,7 +10,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.riquelme.springbootcrudhibernaterestful.validations.ExistsByEmail;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,12 +19,16 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Entidad que representa un usuario en el sistema.
+ */
 @Entity
 @Table(name = "users")
 public class User {
@@ -47,13 +50,13 @@ public class User {
 
     @NotBlank
     @Email
-    @ExistsByEmail()
+    @ExistsByEmail() // Validación personalizada para verificar si el correo electrónico ya existe en la base de datos.
     @Size(min = 5, max = 100)
     @Column(name = "email", nullable = false, length = 100, unique = true)
     private String email;
 
     @NotBlank
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) // Asegura que la contraseña no se serialice.
     @Size(min = 5, max = 15)
     @Column(name = "password", nullable = false, length = 250)
     private String password;
@@ -64,21 +67,27 @@ public class User {
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updated_at;
+    private LocalDateTime updatedAt;
 
-    @ManyToMany(cascade = { CascadeType.ALL })
-    @JoinTable(name = "users_roles", joinColumns = { @JoinColumn(name = "user_id") }, inverseJoinColumns = {
-            @JoinColumn(name = "role_id") })
+    @ManyToMany
+    @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
 
     @PrePersist
     public void prePersist() {
-        created_at = LocalDateTime.now();
-        updated_at = LocalDateTime.now();
+        // Establece createdAt y updatedAt a la fecha y hora actual antes de persistir.
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        // Actualiza updatedAt a la fecha y hora actual antes de actualizar.
+        updatedAt = LocalDateTime.now();
     }
 
     public User() {
@@ -145,20 +154,20 @@ public class User {
         this.active = active;
     }
 
-    public LocalDateTime getCreated_at() {
-        return created_at;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreated_at(LocalDateTime created_at) {
-        this.created_at = created_at;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public LocalDateTime getUpdated_at() {
-        return updated_at;
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 
-    public void setUpdated_at(LocalDateTime updated_at) {
-        this.updated_at = updated_at;
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public Set<Role> getRoles() {
@@ -172,7 +181,7 @@ public class User {
     @Override
     public String toString() {
         return "User [id=" + id + ", name=" + name + ", lastname=" + lastname + ", email=" + email + ", password="
-                + password + ", active=" + active + ", created_at=" + created_at + ", updated_at=" + updated_at
+                + password + ", active=" + active + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt
                 + ", roles=" + roles + "]";
     }
 
