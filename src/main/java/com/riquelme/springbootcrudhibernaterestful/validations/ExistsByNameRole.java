@@ -8,12 +8,12 @@ import java.lang.annotation.Target;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
-@Constraint(validatedBy = ExistsByEmailValidation.class)
+@Constraint(validatedBy = ExistsByNameRoleValidation.class)
 @Target({ ElementType.FIELD, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ExistsByEmail {
+public @interface ExistsByNameRole {
 
-    String message() default "{existsByEmail.message}";
+    String message() default "{existsByNameRole.message}";
 
     Class<?>[] groups() default {};
 

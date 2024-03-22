@@ -51,4 +51,10 @@ public class RoleServiceImpl implements RoleService {
         Role roleDb = findById(id);
         roleRepository.delete(roleDb);
     }
+
+    @Transactional(readOnly = true)
+    @Override
+    public boolean existsByName(String role) {
+        return roleRepository.existsByName(role);
+    }
 }

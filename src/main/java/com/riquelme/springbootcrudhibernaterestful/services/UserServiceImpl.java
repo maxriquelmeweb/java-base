@@ -46,6 +46,9 @@ public class UserServiceImpl implements UserService {
         userDb.setLastname(user.getLastname());
         userDb.setEmail(user.getEmail());
         userDb.setActive(user.getActive());
+        if (user.getPassword() != null) {
+            userDb.setPassword(user.getPassword());
+        }
         userDb.setUpdated_at(LocalDateTime.now());
         return userRepository.save(userDb);
     }

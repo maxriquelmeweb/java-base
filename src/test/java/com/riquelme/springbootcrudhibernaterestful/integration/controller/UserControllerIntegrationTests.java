@@ -115,7 +115,7 @@ public class UserControllerIntegrationTests {
         }
 
         @Nested
-        class UserCreationTests {
+        class CreateUserTests {
                 @Test
                 void whenCreateUser_thenReturnsCreatedUser() throws Exception {
                         User user = new User(1L, "Jane Doe", "Jackson", "jane@example.com", "12345", true);
@@ -147,10 +147,26 @@ public class UserControllerIntegrationTests {
                                                         is(getMessage("handleValidationErrors.fails"))))
                                         .andExpect(jsonPath("$.data").exists());
                 }
+
+                @Test
+                void whenCreateUserWithExistingEmail_thenReturnsBadRequest() throws Exception {
+                        User existingUser = new User(1L, "Jane Doe", "Jackson", "jane@example.com", "12345", true);
+                        existingUser.setCreated_at(LocalDateTime.now());
+                        existingUser.setUpdated_at(LocalDateTime.now());
+                        existingUser.setRoles(new HashSet<>());
+
+                        when(userService.existsByEmail("jane@example.com")).thenReturn(true);
+
+                        mockMvc.perform(post("/api/users")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content("{\"name\":\"Jane Doe\",\"lastname\":\"Jackson\",\"email\":\"jane@example.com\",\"password\":\"12345\",\"active\":true}"))
+                                        .andExpect(status().isBadRequest())
+                                        .andExpect(jsonPath("$.data.email", is(getMessage("existsByEmail.message"))));
+                }
         }
 
         @Nested
-        class UserUpdateTests {
+        class UpdateUserTests {
                 @Test
                 void whenUpdateUser_thenReturnsUpdatedUser() throws Exception {
                         User updatedUser = new User(1L, "Jane Doe Updated", "Jackson", "janeupdated@example.com",
@@ -176,7 +192,7 @@ public class UserControllerIntegrationTests {
         }
 
         @Nested
-        class UserDeletionTests {
+        class DeletionUserTests {
                 @Test
                 void whenDeleteUser_thenReturns204() throws Exception {
                         doNothing().when(userService).deleteById(1L);

@@ -7,6 +7,8 @@ import java.util.Set;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import com.riquelme.springbootcrudhibernaterestful.validations.ExistsByNameRole;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,6 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 @Entity
@@ -27,6 +30,8 @@ public class Role {
     private Long id;
 
     @Size(min = 2, max = 50)
+    @ExistsByNameRole()
+    @NotBlank
     @Column(name = "name", nullable = false, length = 50, unique = true)
     private String name;
 
