@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -59,43 +60,49 @@ public class UserControllerTests {
         when(bindingResult.hasErrors()).thenReturn(false);
     }
 
-    @Test
-    public void getUsersTest() {
-        ResponseEntity<MessageResponse> response = userController.getUsers();
-        assertEquals(OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        List<?> responseData = (List<?>) response.getBody().getData();
-        assertEquals(userDTOList.size(), responseData.size());
-        assertEquals(userDTOList.get(0).getName(), ((UserDTO) responseData.get(0)).getName());
+    @Nested
+    class GetUsersTests {
+        @Test
+        public void getUsersTest() {
+            ResponseEntity<MessageResponse> response = userController.getUsers();
+            assertEquals(OK, response.getStatusCode());
+            assertNotNull(response.getBody());
+            List<?> responseData = (List<?>) response.getBody().getData();
+            assertEquals(userDTOList.size(), responseData.size());
+            assertEquals(userDTOList.get(0).getName(), ((UserDTO) responseData.get(0)).getName());
+        }
+
+        @Test
+        public void getUserTest() {
+            ResponseEntity<MessageResponse> response = userController.getUser(1L);
+            assertEquals(OK, response.getStatusCode());
+            assertNotNull(response.getBody());
+            assertEquals(userDTO.toString(), response.getBody().getData().toString());
+        }
     }
 
-    @Test
-    public void getUserTest() {
-        ResponseEntity<MessageResponse> response = userController.getUser(1L);
-        assertEquals(OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(userDTO.toString(), response.getBody().getData().toString());
-    }
+    @Nested
+    class UserModificationTests {
+        @Test
+        public void createUserTest() {
+            ResponseEntity<MessageResponse> response = userController.createUser(user, bindingResult);
+            assertEquals(CREATED, response.getStatusCode());
+            assertNotNull(response.getBody());
+            assertEquals(userDTO.toString(), response.getBody().getData().toString());
+        }
 
-    @Test
-    public void createUserTest() {
-        ResponseEntity<MessageResponse> response = userController.createUser(user, bindingResult);
-        assertEquals(CREATED, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(userDTO.toString(), response.getBody().getData().toString());
-    }
+        @Test
+        public void updateUserTest() {
+            ResponseEntity<MessageResponse> response = userController.updateUser(1L, user, bindingResult);
+            assertEquals(OK, response.getStatusCode());
+            assertNotNull(response.getBody());
+            assertEquals(userDTO.toString(), response.getBody().getData().toString());
+        }
 
-    @Test
-    public void updateUserTest() {
-        ResponseEntity<MessageResponse> response = userController.updateUser(1L, user, bindingResult);
-        assertEquals(OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(userDTO.toString(), response.getBody().getData().toString());
-    }
-
-    @Test
-    public void deleteUserTest() {
-        ResponseEntity<?> response = userController.deleteUser(1L);
-        assertEquals(NO_CONTENT, response.getStatusCode());
+        @Test
+        public void deleteUserTest() {
+            ResponseEntity<?> response = userController.deleteUser(1L);
+            assertEquals(NO_CONTENT, response.getStatusCode());
+        }
     }
 }

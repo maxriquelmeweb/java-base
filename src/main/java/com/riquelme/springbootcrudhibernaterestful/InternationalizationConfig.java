@@ -15,7 +15,7 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 @PropertySource("classpath:config.properties")
 public class InternationalizationConfig {
 
-    @Value("${set.locale.test}")
+    @Value("${set.locale.language}")
     private String defaultLocale;
 
     @Bean

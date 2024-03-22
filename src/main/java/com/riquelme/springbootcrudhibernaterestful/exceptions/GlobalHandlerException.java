@@ -12,11 +12,11 @@ import com.riquelme.springbootcrudhibernaterestful.responses.MessageResponseImpl
 import com.riquelme.springbootcrudhibernaterestful.util.LoggerUtil;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalHandlerException {
 
     private final MessageSource messageSource;
 
-    public GlobalExceptionHandler(MessageSource messageSource) {
+    public GlobalHandlerException(MessageSource messageSource) {
         this.messageSource = messageSource;
     }
 
@@ -30,7 +30,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<MessageResponse> handleResourceNotFoundException(ResourceNotFoundException ex,
             WebRequest request) {
-        LoggerUtil.warn(ex.getMessage(), ex);
         return new ResponseEntity<>(new MessageResponseImpl(messageSource, ex.getResourceType(), null, null),
                 HttpStatus.NOT_FOUND);
     }

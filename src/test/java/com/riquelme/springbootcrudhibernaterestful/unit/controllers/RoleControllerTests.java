@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -58,44 +59,50 @@ public class RoleControllerTests {
         when(bindingResult.hasErrors()).thenReturn(false);
     }
 
-    @Test
-    public void getRolesTest() {
-        ResponseEntity<MessageResponse> response = roleController.getRoles();
-        assertEquals(OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        List<?> responseData = (List<?>) response.getBody().getData();
-        assertEquals(roleDTOList.size(), responseData.size());
-        assertEquals(roleDTOList.get(0).getName(), ((RoleDTO) responseData.get(0)).getName());
+    @Nested
+    class GetRolesTests {
+        @Test
+        public void getRolesTest() {
+            ResponseEntity<MessageResponse> response = roleController.getRoles();
+            assertEquals(OK, response.getStatusCode());
+            assertNotNull(response.getBody());
+            List<?> responseData = (List<?>) response.getBody().getData();
+            assertEquals(roleDTOList.size(), responseData.size());
+            assertEquals(roleDTOList.get(0).getName(), ((RoleDTO) responseData.get(0)).getName());
+        }
+
+        @Test
+        public void getRoleTest() {
+            ResponseEntity<MessageResponse> response = roleController.getRole(1L);
+            assertEquals(OK, response.getStatusCode());
+            assertNotNull(response.getBody());
+            RoleDTO responseData = (RoleDTO) response.getBody().getData();
+            assertEquals(roleDTO.getName(), responseData.getName());
+        }
     }
 
-    @Test
-    public void getRoleTest() {
-        ResponseEntity<MessageResponse> response = roleController.getRole(1L);
-        assertEquals(OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        RoleDTO responseData = (RoleDTO) response.getBody().getData();
-        assertEquals(roleDTO.getName(), responseData.getName());
-    }
+    @Nested
+    class RoleModificationTests {
+        @Test
+        public void createRoleTest() {
+            ResponseEntity<MessageResponse> response = roleController.createRole(role, bindingResult);
+            assertEquals(CREATED, response.getStatusCode());
+            assertNotNull(response.getBody());
+            assertEquals(roleDTO.toString(), response.getBody().getData().toString());
+        }
 
-    @Test
-    public void createRoleTest() {
-        ResponseEntity<MessageResponse> response = roleController.createRole(role, bindingResult);
-        assertEquals(CREATED, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(roleDTO.toString(), response.getBody().getData().toString());
-    }
+        @Test
+        public void updateRoleTest() {
+            ResponseEntity<MessageResponse> response = roleController.updateRole(1L, role, bindingResult);
+            assertEquals(OK, response.getStatusCode());
+            assertNotNull(response.getBody());
+            assertEquals(roleDTO.toString(), response.getBody().getData().toString());
+        }
 
-    @Test
-    public void updateRoleTest() {
-        ResponseEntity<MessageResponse> response = roleController.updateRole(1L, role, bindingResult);
-        assertEquals(OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(roleDTO.toString(), response.getBody().getData().toString());
-    }
-
-    @Test
-    public void deleteRoleTest() {
-        ResponseEntity<?> response = roleController.deleteRole(1L);
-        assertEquals(NO_CONTENT, response.getStatusCode());
+        @Test
+        public void deleteRoleTest() {
+            ResponseEntity<?> response = roleController.deleteRole(1L);
+            assertEquals(NO_CONTENT, response.getStatusCode());
+        }
     }
 }

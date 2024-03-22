@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,7 +44,7 @@ public class UserControllerIntegrationTests {
         @Autowired
         private MessageSource messageSource;
 
-        @Value("${set.locale.test}")
+        @Value("${set.locale.language}")
         private String defaultLocale;
 
         private String getMessage(String messageKey) {
@@ -51,123 +52,138 @@ public class UserControllerIntegrationTests {
                 return messageSource.getMessage(messageKey, null, esLocale);
         }
 
-        @Test
-        public void whenGetAllUsers_thenReturnsUsersList() throws Exception {
-                User user1 = new User(1L, "John Doe", "Jackson", "john@example.com", "Ea.Pas41", true);
-                user1.setCreated_at(LocalDateTime.now().minusDays(1));
-                user1.setUpdated_at(LocalDateTime.now());
-                user1.setRoles(new HashSet<>());
+        @Nested
+        class GetUsersTests {
+                @Test
+                void whenGetAllUsers_thenReturnsUsersList() throws Exception {
+                        User user1 = new User(1L, "John Doe", "Jackson", "john@example.com", "Ea.Pas41", true);
+                        user1.setCreated_at(LocalDateTime.now().minusDays(1));
+                        user1.setUpdated_at(LocalDateTime.now());
+                        user1.setRoles(new HashSet<>());
 
-                User user2 = new User(2L, "Jane Doe", "Smith", "jane@example.com", "Ea.Pas42", true);
-                user2.setCreated_at(LocalDateTime.now().minusDays(1));
-                user2.setUpdated_at(LocalDateTime.now());
-                user2.setRoles(new HashSet<>());
+                        User user2 = new User(2L, "Jane Doe", "Smith", "jane@example.com", "Ea.Pas42", true);
+                        user2.setCreated_at(LocalDateTime.now().minusDays(1));
+                        user2.setUpdated_at(LocalDateTime.now());
+                        user2.setRoles(new HashSet<>());
 
-                when(userService.findAll()).thenReturn(Arrays.asList(user1, user2));
+                        when(userService.findAll()).thenReturn(Arrays.asList(user1, user2));
 
-                mockMvc.perform(get("/api/users"))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.data", hasSize(2)))
-                                .andExpect(jsonPath("$.data[0].name", is("John Doe")))
-                                .andExpect(jsonPath("$.data[0].lastname", is("Jackson")))
-                                .andExpect(jsonPath("$.data[0].email", is("john@example.com")))
-                                .andExpect(jsonPath("$.data[0].active", is(true)))
-                                .andExpect(jsonPath("$.data[0].roles", isA(List.class)))
-                                .andExpect(jsonPath("$.data[1].name", is("Jane Doe")))
-                                .andExpect(jsonPath("$.data[1].lastname", is("Smith")))
-                                .andExpect(jsonPath("$.data[1].email", is("jane@example.com")))
-                                .andExpect(jsonPath("$.data[1].active", is(true)))
-                                .andExpect(jsonPath("$.data[1].roles", isA(List.class)))
-                                .andExpect(jsonPath("$.message", is(getMessage("user.getUsers.success"))));
+                        mockMvc.perform(get("/api/users"))
+                                        .andExpect(status().isOk())
+                                        .andExpect(jsonPath("$.data", hasSize(2)))
+                                        .andExpect(jsonPath("$.data[0].name", is("John Doe")))
+                                        .andExpect(jsonPath("$.data[0].lastname", is("Jackson")))
+                                        .andExpect(jsonPath("$.data[0].email", is("john@example.com")))
+                                        .andExpect(jsonPath("$.data[0].active", is(true)))
+                                        .andExpect(jsonPath("$.data[0].roles", isA(List.class)))
+                                        .andExpect(jsonPath("$.data[1].name", is("Jane Doe")))
+                                        .andExpect(jsonPath("$.data[1].lastname", is("Smith")))
+                                        .andExpect(jsonPath("$.data[1].email", is("jane@example.com")))
+                                        .andExpect(jsonPath("$.data[1].active", is(true)))
+                                        .andExpect(jsonPath("$.data[1].roles", isA(List.class)))
+                                        .andExpect(jsonPath("$.message", is(getMessage("user.getUsers.success"))));
+                }
+
+                @Test
+                void whenGetUser_thenReturnsUser() throws Exception {
+                        User user = new User(1L, "John Doe", "Jackson", "john@example.com", "Ea.Pas41", true);
+                        user.setCreated_at(LocalDateTime.now().minusDays(1));
+                        user.setUpdated_at(LocalDateTime.now());
+                        user.setRoles(new HashSet<>());
+
+                        when(userService.findById(1L)).thenReturn(user);
+
+                        mockMvc.perform(get("/api/users/1"))
+                                        .andExpect(status().isOk())
+                                        .andExpect(jsonPath("$.data.name", is("John Doe")))
+                                        .andExpect(jsonPath("$.data.lastname", is("Jackson")))
+                                        .andExpect(jsonPath("$.data.email", is("john@example.com")))
+                                        .andExpect(jsonPath("$.data.active", is(true)))
+                                        .andExpect(jsonPath("$.data.roles", isA(List.class)))
+                                        .andExpect(jsonPath("$.message", is(getMessage("user.getUser.success"))));
+                }
+
+                @Test
+                void whenGetUserNotFound_thenReturns404() throws Exception {
+                        when(userService.findById(anyLong()))
+                                        .thenThrow(new ResourceNotFoundException("user.error.notfound"));
+                        mockMvc.perform(get("/api/users/999"))
+                                        .andExpect(status().isNotFound())
+                                        .andExpect(jsonPath("$.message", is(getMessage("user.error.notfound"))))
+                                        .andExpect(jsonPath("$.data").doesNotExist());
+                }
         }
 
-        @Test
-        public void whenGetUser_thenReturnsUser() throws Exception {
-                User user = new User(1L, "John Doe", "Jackson", "john@example.com", "Ea.Pas41", true);
-                user.setCreated_at(LocalDateTime.now().minusDays(1));
-                user.setUpdated_at(LocalDateTime.now());
-                user.setRoles(new HashSet<>());
+        @Nested
+        class UserCreationTests {
+                @Test
+                void whenCreateUser_thenReturnsCreatedUser() throws Exception {
+                        User user = new User(1L, "Jane Doe", "Jackson", "jane@example.com", "12345", true);
+                        user.setCreated_at(LocalDateTime.now());
+                        user.setUpdated_at(LocalDateTime.now());
+                        user.setRoles(new HashSet<>());
 
-                when(userService.findById(1L)).thenReturn(user);
+                        when(userService.save(any(User.class))).thenReturn(user);
 
-                mockMvc.perform(get("/api/users/1"))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.data.name", is("John Doe")))
-                                .andExpect(jsonPath("$.data.lastname", is("Jackson")))
-                                .andExpect(jsonPath("$.data.email", is("john@example.com")))
-                                .andExpect(jsonPath("$.data.active", is(true)))
-                                .andExpect(jsonPath("$.data.roles", isA(List.class)))
-                                .andExpect(jsonPath("$.message", is(getMessage("user.getUser.success"))));
+                        mockMvc.perform(post("/api/users")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content("{\"name\":\"Jane Doe\",\"lastname\":\"Jackson\",\"email\":\"jane@example.com\",\"password\":\"12345\",\"active\":true}"))
+                                        .andExpect(status().isCreated())
+                                        .andExpect(jsonPath("$.data.name", is(user.getName())))
+                                        .andExpect(jsonPath("$.data.lastname", is("Jackson")))
+                                        .andExpect(jsonPath("$.data.email", is(user.getEmail())))
+                                        .andExpect(jsonPath("$.data.active", is(true)))
+                                        .andExpect(jsonPath("$.data.roles", isA(List.class)))
+                                        .andExpect(jsonPath("$.message", is(getMessage("user.createUser.success"))));
+                }
+
+                @Test
+                void whenCreateUserWithValidationErrors_thenReturnsBadRequest() throws Exception {
+                        mockMvc.perform(post("/api/users")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content("{\"name\":\"\",\"lastname\":\"\",\"email\":\"not-an-email\",\"password\":\"12345\",\"active\":true}"))
+                                        .andExpect(status().isBadRequest())
+                                        .andExpect(jsonPath("$.message",
+                                                        is(getMessage("handleValidationErrors.fails"))))
+                                        .andExpect(jsonPath("$.data").exists());
+                }
         }
 
-        @Test
-        public void whenCreateUser_thenReturnsCreatedUser() throws Exception {
-                User user = new User(1L, "Jane Doe", "Jackson", "jane@example.com", "12345", true);
-                user.setCreated_at(LocalDateTime.now());
-                user.setUpdated_at(LocalDateTime.now());
-                user.setRoles(new HashSet<>());
+        @Nested
+        class UserUpdateTests {
+                @Test
+                void whenUpdateUser_thenReturnsUpdatedUser() throws Exception {
+                        User updatedUser = new User(1L, "Jane Doe Updated", "Jackson", "janeupdated@example.com",
+                                        "12345",
+                                        true);
+                        updatedUser.setCreated_at(LocalDateTime.now().minusDays(1)); // Por ejemplo, fue creado ayer
+                        updatedUser.setUpdated_at(LocalDateTime.now()); // Actualizado ahora
+                        updatedUser.setRoles(new HashSet<>());
 
-                when(userService.save(any(User.class))).thenReturn(user);
+                        when(userService.update(eq(1L), any(User.class))).thenReturn(updatedUser);
 
-                mockMvc.perform(post("/api/users")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"Jane Doe\",\"lastname\":\"Jackson\",\"email\":\"jane@example.com\",\"password\":\"12345\",\"active\":true}"))
-                                .andExpect(status().isCreated())
-                                .andExpect(jsonPath("$.data.name", is(user.getName())))
-                                .andExpect(jsonPath("$.data.lastname", is("Jackson")))
-                                .andExpect(jsonPath("$.data.email", is(user.getEmail())))
-                                .andExpect(jsonPath("$.data.active", is(true)))
-                                .andExpect(jsonPath("$.data.roles", isA(List.class)))
-                                .andExpect(jsonPath("$.message", is(getMessage("user.createUser.success"))));
+                        mockMvc.perform(put("/api/users/1")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content("{\"name\":\"Jane Doe Updated\",\"lastname\":\"Jackson\",\"email\":\"janeupdated@example.com\",\"password\":\"12345\",\"active\":true}"))
+                                        .andExpect(status().isOk())
+                                        .andExpect(jsonPath("$.data.name", is(updatedUser.getName())))
+                                        .andExpect(jsonPath("$.data.lastname", is("Jackson")))
+                                        .andExpect(jsonPath("$.data.email", is(updatedUser.getEmail())))
+                                        .andExpect(jsonPath("$.data.active", is(true)))
+                                        .andExpect(jsonPath("$.data.roles", isA(List.class)))
+                                        .andExpect(jsonPath("$.message", is(getMessage("user.updateUser.success"))));
+                }
         }
 
-        @Test
-        public void whenUpdateUser_thenReturnsUpdatedUser() throws Exception {
-                User updatedUser = new User(1L, "Jane Doe Updated", "Jackson", "janeupdated@example.com", "12345",
-                                true);
-                updatedUser.setCreated_at(LocalDateTime.now().minusDays(1)); // Por ejemplo, fue creado ayer
-                updatedUser.setUpdated_at(LocalDateTime.now()); // Actualizado ahora
-                updatedUser.setRoles(new HashSet<>());
-
-                when(userService.update(eq(1L), any(User.class))).thenReturn(updatedUser);
-
-                mockMvc.perform(put("/api/users/1")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"Jane Doe Updated\",\"lastname\":\"Jackson\",\"email\":\"janeupdated@example.com\",\"password\":\"12345\",\"active\":true}"))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.data.name", is(updatedUser.getName())))
-                                .andExpect(jsonPath("$.data.lastname", is("Jackson")))
-                                .andExpect(jsonPath("$.data.email", is(updatedUser.getEmail())))
-                                .andExpect(jsonPath("$.data.active", is(true)))
-                                .andExpect(jsonPath("$.data.roles", isA(List.class)))
-                                .andExpect(jsonPath("$.message", is(getMessage("user.updateUser.success"))));
-        }
-
-        @Test
-        public void whenDeleteUser_thenReturns204() throws Exception {
-                doNothing().when(userService).deleteById(1L);
-                mockMvc.perform(delete("/api/users/1"))
-                                .andExpect(status().isNoContent())
-                                .andExpect(jsonPath("$.data").doesNotExist());
-        }
-
-        @Test
-        public void whenGetUserNotFound_thenReturns404() throws Exception {
-                when(userService.findById(anyLong())).thenThrow(new ResourceNotFoundException("user.error.notfound"));
-                mockMvc.perform(get("/api/users/999"))
-                                .andExpect(status().isNotFound())
-                                .andExpect(jsonPath("$.message", is(getMessage("user.error.notfound"))))
-                                .andExpect(jsonPath("$.data").doesNotExist());
-        }
-
-        @Test
-        public void whenCreateUserWithValidationErrors_thenReturnsBadRequest() throws Exception {
-                mockMvc.perform(post("/api/users")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"\",\"lastname\":\"\",\"email\":\"not-an-email\",\"password\":\"12345\",\"active\":true}"))
-                                .andExpect(status().isBadRequest())
-                                .andExpect(jsonPath("$.message", is(getMessage("handleValidationErrors.fails"))))
-                                .andExpect(jsonPath("$.data").exists());
+        @Nested
+        class UserDeletionTests {
+                @Test
+                void whenDeleteUser_thenReturns204() throws Exception {
+                        doNothing().when(userService).deleteById(1L);
+                        mockMvc.perform(delete("/api/users/1"))
+                                        .andExpect(status().isNoContent())
+                                        .andExpect(jsonPath("$.data").doesNotExist());
+                }
         }
 
 }
