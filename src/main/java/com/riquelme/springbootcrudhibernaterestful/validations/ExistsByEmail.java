@@ -5,8 +5,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.beans.factory.annotation.Value;
-
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
@@ -15,8 +13,7 @@ import jakarta.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExistsByEmail {
 
-    @Value("${existsByEmail.message}")
-    String message() default "el correo electrónico ya está en uso";
+    String message() default "{existsByEmail.message}";
 
     Class<?>[] groups() default {};
 
