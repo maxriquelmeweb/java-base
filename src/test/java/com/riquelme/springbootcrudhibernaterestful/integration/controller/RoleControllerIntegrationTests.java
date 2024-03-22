@@ -145,6 +145,18 @@ public class RoleControllerIntegrationTests {
                                                         is(getMessage("handleValidationErrors.fails"))))
                                         .andExpect(jsonPath("$.data").exists());
                 }
+
+                @Test
+                void whenCreateRoleWithExistingName_thenReturnsBadRequest() throws Exception {
+                        String roleName = "Admin";
+                        when(roleService.existsByName(roleName)).thenReturn(true);
+                        mockMvc.perform(post("/api/roles")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content("{\"name\":\"" + roleName + "\"}"))
+                                        .andExpect(status().isBadRequest())
+                                        .andExpect(jsonPath("$.data.name",
+                                                        is(getMessage("existsByNameRole.message"))));
+                }
         }
 
         @Nested

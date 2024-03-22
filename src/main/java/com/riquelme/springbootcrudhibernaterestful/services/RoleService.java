@@ -14,4 +14,6 @@ public interface RoleService {
   Role update(Long id, Role role);
 
   void deleteById(Long id);
+
+  boolean existsByName(String role);
 }

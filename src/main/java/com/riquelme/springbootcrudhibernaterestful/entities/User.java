@@ -52,7 +52,7 @@ public class User {
     @Column(name = "email", nullable = false, length = 100, unique = true)
     private String email;
 
-    
+    @NotBlank
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Size(min = 5, max = 15)
     @Column(name = "password", nullable = false, length = 250)
