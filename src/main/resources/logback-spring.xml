@@ -38,7 +38,7 @@
     </appender>
 
     <!-- Logger específico para capturar ciertos mensajes -->
-    <logger name="logger.specific" level="INFO" additivity="false">
+    <logger name="logger.log" level="DEBUG" additivity="false">
         <appender-ref ref="DAILY" />
     </logger>
 

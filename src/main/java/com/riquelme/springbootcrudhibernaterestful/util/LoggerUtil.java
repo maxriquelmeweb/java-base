@@ -1,57 +1,56 @@
 package com.riquelme.springbootcrudhibernaterestful.util;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LoggerUtil {
-    private static final Logger logger = LoggerFactory.getLogger("logger.specific");
-
-    public static void trace(String msg) {
-        logger.trace(msg);
-    }
-
-    public static void trace(String msg, Throwable throwable) {
-        logger.trace(msg, throwable);
-    }
+    private static final Logger logger = LoggerFactory.getLogger("logger.log");
 
     public static void debug(String msg) {
-        logger.debug(msg);
-    }
-
-    public static void debug(String msg, Throwable throwable) {
-        logger.debug(msg, throwable);
+        if (logger.isDebugEnabled()) {
+            logger.debug(msg);
+        }
     }
 
     public static void info(String msg) {
-        logger.info(msg);
-    }
-
-    public static void info(String msg, Throwable throwable) {
-        logger.info(msg, throwable);
+        if (logger.isInfoEnabled()) {
+            logger.info(msg);
+        }
     }
 
     public static void warn(String msg) {
-        logger.warn(msg);
+        if (logger.isWarnEnabled()) {
+            logger.warn(msg);
+        }
     }
 
-    public static void warn(String msg, Throwable throwable) {
-        logger.warn(msg, throwable);
+    public static void debug(String msg, Map<String, String> details) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("{}: {}", msg, mapToString(details));
+        }
     }
 
     public static void error(String msg) {
-        logger.error(msg);
+        if (logger.isErrorEnabled()) {
+            logger.error(msg);
+        }
     }
 
-    public static void error(String msg, Throwable throwable) {
-        logger.error(msg, throwable);
+    public static void error(String msg, Throwable t) {
+        if (logger.isErrorEnabled()) {
+            logger.error(msg, t);
+        }
     }
 
-    public static void fatal(String msg) {
-        logger.error("[FATAL] " + msg);
-    }
-
-    public static void fatal(String msg, Throwable throwable) {
-        logger.error("[FATAL] " + msg, throwable);
+    private static String mapToString(Map<String, String> map) {
+        StringBuilder sb = new StringBuilder();
+        map.forEach((key, value) -> sb.append(key).append("=").append(value).append(", "));
+        if (sb.length() > 0) {
+            sb.delete(sb.length() - 2, sb.length()); // Remove the trailing comma and space
+        }
+        return sb.toString();
     }
 
     /*
@@ -93,4 +92,5 @@ public class LoggerUtil {
      * registro según el entorno (por ejemplo, desactivar los niveles de depuración
      * en producción para evitar la sobrecarga de registros).
      */
+
 }
