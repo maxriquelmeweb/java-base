@@ -1,4 +1,4 @@
-package com.riquelme.springbootcrudhibernaterestful.integration.controller;
+package com.riquelme.springbootcrudhibernaterestful.integration.controllers;
 
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.isA;
