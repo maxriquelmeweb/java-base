@@ -1,4 +1,4 @@
-package com.riquelme.springbootcrudhibernaterestful.integration.services;
+package com.riquelme.springbootcrudhibernaterestful.unit.services;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -8,12 +8,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
 import com.riquelme.springbootcrudhibernaterestful.exceptions.ResourceNotFoundException;
@@ -21,7 +21,7 @@ import com.riquelme.springbootcrudhibernaterestful.repositories.UserRepository;
 import com.riquelme.springbootcrudhibernaterestful.services.UserServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceIntegrationTests {
+public class UserServiceImplTests {
 
     @Mock
     private UserRepository userRepository;
@@ -29,23 +29,27 @@ public class UserServiceIntegrationTests {
     @InjectMocks
     private UserServiceImpl userService;
 
+    private User user;
+
+    @BeforeEach
+    void setUp() {
+        user = new User(1L, "John", "Doe", "john.doe@example.com", "password", true);
+    }
+
     @Test
     void whenFindAll_thenReturnUserList() {
-        User user1 = new User(1L, "John", "Doe", "john@example.com", "password123", true);
-        User user2 = new User(2L, "Jane", "Doe", "jane@example.com", "password123", true);
-
-        when(userRepository.findAll()).thenReturn(Arrays.asList(user1, user2));
+        User user2 = new User(2L, "Jane", "Doe", "jane.doe@example.com", "password", true);
+        when(userRepository.findAll()).thenReturn(Arrays.asList(user, user2));
 
         List<User> users = userService.findAll();
 
         assertNotNull(users);
         assertEquals(2, users.size());
-        verify(userRepository).findAll();
+        assertTrue(users.contains(user) && users.contains(user2));
     }
 
     @Test
     void whenFindById_thenReturnUser() {
-        User user = new User(1L, "John", "Doe", "john@example.com", "password123", true);
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         User foundUser = userService.findById(1L);
@@ -62,46 +66,42 @@ public class UserServiceIntegrationTests {
     }
 
     @Test
-    @Transactional
     void whenSave_thenPersistUser() {
-        User user = new User(null, "New User", "Lastname", "newuser@example.com", "password123", true);
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         User savedUser = userService.save(user);
 
         assertNotNull(savedUser);
-        assertEquals("New User", savedUser.getName());
+        assertEquals("John", savedUser.getName());
     }
 
     @Test
-    @Transactional
     void whenUpdate_thenUpdateUserDetails() {
-        User existingUser = new User(1L, "John", "Doe", "john@example.com", "password123", true);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
-        when(userRepository.save(any(User.class))).thenReturn(existingUser);
+        User updatedUser = new User(1L, "John", "Doe", "john.update@example.com", "newpassword", true);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenReturn(updatedUser);
 
-        User updatedUser = new User(1L, "Updated Name", "Updated Lastname", "updated@example.com", "password123", true);
-        User resultUser = userService.update(1L, updatedUser);
+        User result = userService.update(1L, updatedUser);
 
-        assertNotNull(resultUser);
-        assertEquals("Updated Name", resultUser.getName());
+        assertNotNull(result);
+        assertEquals("john.update@example.com", result.getEmail());
     }
 
     @Test
-    @Transactional
     void whenDeleteById_thenUserShouldBeDeleted() {
-        User user = new User(1L, "John", "Doe", "john@example.com", "password123", true);
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        doNothing().when(userRepository).delete(user);
 
         userService.deleteById(1L);
 
-        verify(userRepository).delete(user);
+        verify(userRepository, times(1)).delete(user);
     }
 
     @Test
     void whenExistsByEmail_thenReturnTrueOrFalse() {
-        when(userRepository.existsByEmail("john@example.com")).thenReturn(true);
-        boolean exists = userService.existsByEmail("john@example.com");
+        when(userRepository.existsByEmail("john.doe@example.com")).thenReturn(true);
+
+        boolean exists = userService.existsByEmail("john.doe@example.com");
 
         assertTrue(exists);
     }

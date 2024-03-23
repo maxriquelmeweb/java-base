@@ -22,7 +22,7 @@ import com.riquelme.springbootcrudhibernaterestful.repositories.RoleRepository;
 import com.riquelme.springbootcrudhibernaterestful.services.RoleServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
-public class RoleServiceIntegrationTests {
+public class RoleServiceImplIntegrationTests {
 
     @Mock
     private RoleRepository roleRepository;
