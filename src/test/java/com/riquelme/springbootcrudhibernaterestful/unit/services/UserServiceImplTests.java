@@ -117,9 +117,10 @@ public class UserServiceImplTests {
 
     @Test
     void whenDeleteById_thenUserShouldBeDeleted() {
-        doNothing().when(userRepository).deleteById(1L);
-        userService.deleteById(1L);
-        verify(userRepository, times(1)).deleteById(1L);
+        Long id = 1L;
+        when(userRepository.existsById(id)).thenReturn(true);
+        userService.deleteById(id);
+        verify(userRepository).deleteById(id);
     }
 
     @Test

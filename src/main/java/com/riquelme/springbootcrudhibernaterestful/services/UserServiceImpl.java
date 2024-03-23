@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,6 +18,8 @@ import com.riquelme.springbootcrudhibernaterestful.exceptions.CustomException;
 import com.riquelme.springbootcrudhibernaterestful.repositories.RoleRepository;
 import com.riquelme.springbootcrudhibernaterestful.repositories.UserRepository;
 import com.riquelme.springbootcrudhibernaterestful.util.EntityDtoMapper;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -38,7 +39,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     @Override
     public List<UserDTO> findAll() {
-        List<User> users = (List<User>) userRepository.findAll();
+        List<User> users = userRepository.findAll();
         return users.stream()
                 .map(user -> entityDtoMapper.convertToDTO(user, UserDTO.class))
                 .collect(Collectors.toList());
@@ -48,7 +49,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO findById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new CustomException("user.error.notfound", new NoSuchElementException()));
+                .orElseThrow(() -> new CustomException("user.error.notfound", new EntityNotFoundException()));
         return entityDtoMapper.convertToDTO(user, UserDTO.class);
     }
 
@@ -57,7 +58,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO save(User user) {
         // Buscar el rol "USER" por ID o nombre. Asumimos que el rol con ID 1 es "USER".
         Role userRole = roleRepository.findById(1L)
-                .orElseThrow(() -> new CustomException("role.notDefaultRole.message", new NoSuchElementException()));
+                .orElseThrow(() -> new CustomException("role.notDefaultRole.message", new EntityNotFoundException()));
         // Asignar el rol al nuevo usuario
         user.setRoles(new HashSet<>(Arrays.asList(userRole)));
         User newUser = userRepository.save(user);
@@ -68,7 +69,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO update(Long id, User user) {
         User userDb = userRepository.findById(id)
-                .orElseThrow(() -> new CustomException("user.error.notfound", new NoSuchElementException()));
+                .orElseThrow(() -> new CustomException("user.error.notfound", new EntityNotFoundException()));
         userDb.setName(user.getName());
         userDb.setLastname(user.getLastname());
         userDb.setEmail(user.getEmail());
@@ -84,6 +85,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public void deleteById(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new CustomException("user.error.notfound", new EntityNotFoundException());
+        }
         userRepository.deleteById(id);
     }
 
@@ -97,11 +101,11 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDTO addRolesToUser(Long userId, Set<Long> roleIds) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException("user.error.notfound", new NoSuchElementException()));
+                .orElseThrow(() -> new CustomException("user.error.notfound", new EntityNotFoundException()));
         Set<Role> existingRoles = user.getRoles();
         Set<Role> rolesToAdd = roleIds.stream()
                 .map(roleId -> roleRepository.findById(roleId)
-                        .orElseThrow(() -> new CustomException("role.error.notfound", new NoSuchElementException())))
+                        .orElseThrow(() -> new CustomException("role.error.notfound", new EntityNotFoundException())))
                 .filter(newRole -> existingRoles.stream()
                         .noneMatch(existingRole -> existingRole.getId().equals(newRole.getId())))
                 .collect(Collectors.toSet());
@@ -118,15 +122,15 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDTO removeRolesFromUser(Long userId, Set<Long> roleIds) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException("user.error.notfound", new NoSuchElementException()));
+                .orElseThrow(() -> new CustomException("user.error.notfound", new EntityNotFoundException()));
 
         Set<Role> rolesToRemove = roleIds.stream()
                 .map(roleId -> roleRepository.findById(roleId)
-                        .orElseThrow(() -> new CustomException("role.error.notfound", new NoSuchElementException())))
+                        .orElseThrow(() -> new CustomException("role.error.notfound", new EntityNotFoundException())))
                 .collect(Collectors.toSet());
 
-        // Verificar que todos los roles a remover realmente pertenecen al usuario
         rolesToRemove.forEach(role -> {
+            // Verificar que todos los roles a remover realmente pertenecen al usuario
             if (!user.getRoles().contains(role)) {
                 throw new CustomException("user.notContentRole.message", new IllegalArgumentException());
             }

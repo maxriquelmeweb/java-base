@@ -1,7 +1,6 @@
 package com.riquelme.springbootcrudhibernaterestful.services;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -13,6 +12,8 @@ import com.riquelme.springbootcrudhibernaterestful.entities.Role;
 import com.riquelme.springbootcrudhibernaterestful.exceptions.CustomException;
 import com.riquelme.springbootcrudhibernaterestful.repositories.RoleRepository;
 import com.riquelme.springbootcrudhibernaterestful.util.EntityDtoMapper;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class RoleServiceImpl implements RoleService {
@@ -28,7 +29,7 @@ public class RoleServiceImpl implements RoleService {
     @Transactional(readOnly = true)
     @Override
     public List<RoleDTO> findAll() {
-        List<Role> roles = (List<Role>) roleRepository.findAll();
+        List<Role> roles = roleRepository.findAll();
         return roles.stream()
                 .map(role -> entityDtoMapper.convertToDTO(role, RoleDTO.class))
                 .collect(Collectors.toList());
@@ -38,7 +39,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public RoleDTO findById(Long id) {
         Role roleDb = roleRepository.findById(id)
-                .orElseThrow(() -> new CustomException("role.error.notfound", new NoSuchElementException()));
+                .orElseThrow(() -> new CustomException("role.error.notfound", new EntityNotFoundException()));
         return entityDtoMapper.convertToDTO(roleDb, RoleDTO.class);
     }
 
@@ -53,7 +54,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public RoleDTO update(Long id, Role role) {
         Role roleDb = roleRepository.findById(id)
-                .orElseThrow(() -> new CustomException("role.error.notfound", new NoSuchElementException()));
+                .orElseThrow(() -> new CustomException("role.error.notfound", new EntityNotFoundException()));
 
         if (roleRepository.existsByName(role.getName())) {
             throw new CustomException("existsByNameRole.message", new DataIntegrityViolationException(null));
@@ -67,7 +68,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public void deleteById(Long id) {
         if (!roleRepository.existsById(id)) {
-            throw new CustomException("role.error.notfound",new NoSuchElementException());
+            throw new CustomException("role.error.notfound", new EntityNotFoundException());
         }
         roleRepository.deleteById(id);
     }
