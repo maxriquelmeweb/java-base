@@ -1,14 +1,16 @@
 package com.riquelme.springbootcrudhibernaterestful.services;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.riquelme.springbootcrudhibernaterestful.dtos.RoleDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.Role;
-import com.riquelme.springbootcrudhibernaterestful.exceptions.ResourceNotFoundException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.CustomException;
 import com.riquelme.springbootcrudhibernaterestful.repositories.RoleRepository;
 import com.riquelme.springbootcrudhibernaterestful.util.EntityDtoMapper;
 
@@ -35,9 +37,9 @@ public class RoleServiceImpl implements RoleService {
     @Transactional(readOnly = true)
     @Override
     public RoleDTO findById(Long id) {
-        Role role = roleRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("role.error.notfound"));
-        return entityDtoMapper.convertToDTO(role, RoleDTO.class);
+        Role roleDb = roleRepository.findById(id)
+                .orElseThrow(() -> new CustomException("role.error.notfound", new NoSuchElementException()));
+        return entityDtoMapper.convertToDTO(roleDb, RoleDTO.class);
     }
 
     @Transactional
@@ -51,9 +53,10 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public RoleDTO update(Long id, Role role) {
         Role roleDb = roleRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("role.error.notfound"));
+                .orElseThrow(() -> new CustomException("role.error.notfound", new NoSuchElementException()));
+
         if (roleRepository.existsByName(role.getName())) {
-            throw new ResourceNotFoundException("existsByNameRole.message");
+            throw new CustomException("existsByNameRole.message", new DataIntegrityViolationException(null));
         }
         roleDb.setName(role.getName());
         Role updateRole = roleRepository.save(roleDb);
@@ -63,8 +66,9 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     @Override
     public void deleteById(Long id) {
-        roleRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("role.error.notfound"));
+        if (!roleRepository.existsById(id)) {
+            throw new CustomException("role.error.notfound",new NoSuchElementException());
+        }
         roleRepository.deleteById(id);
     }
 

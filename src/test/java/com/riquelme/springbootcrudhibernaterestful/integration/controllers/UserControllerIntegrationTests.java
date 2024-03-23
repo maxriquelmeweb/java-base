@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.riquelme.springbootcrudhibernaterestful.dtos.RoleIdsDTO;
 import com.riquelme.springbootcrudhibernaterestful.dtos.UserDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
-import com.riquelme.springbootcrudhibernaterestful.exceptions.ResourceNotFoundException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.CustomException;
 import com.riquelme.springbootcrudhibernaterestful.services.UserService;
 
 @SpringBootTest
@@ -102,7 +103,8 @@ public class UserControllerIntegrationTests {
                 @Test
                 void whenGetUserNotFound_thenReturns404() throws Exception {
                         when(userService.findById(anyLong()))
-                                        .thenThrow(new ResourceNotFoundException("user.error.notfound"));
+                                        .thenThrow(new CustomException("user.error.notfound",
+                                                        new NoSuchElementException()));
                         mockMvc.perform(get("/api/users/999"))
                                         .andExpect(status().isNotFound())
                                         .andExpect(jsonPath("$.message", is(getMessage("user.error.notfound"))))

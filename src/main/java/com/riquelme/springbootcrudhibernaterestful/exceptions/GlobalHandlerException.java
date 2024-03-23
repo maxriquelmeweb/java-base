@@ -1,7 +1,6 @@
 package com.riquelme.springbootcrudhibernaterestful.exceptions;
 
 import org.springframework.context.MessageSource;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,29 +22,37 @@ public class GlobalHandlerException {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<MessageResponse> handleAllExceptions(Exception ex, WebRequest request) {
-        LoggerUtil.error(ex.getMessage(), ex);
+        String messageException = ex.getMessage();
         HttpStatus statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
         String messageKey = "general.error.message";
 
-        // Aquí se revisa directamente la excepción y se cambia el estado HTTP a
-        // BAD_REQUEST
-        if (ex instanceof IllegalArgumentException) {
-            statusCode = HttpStatus.BAD_REQUEST;
-            messageKey = "user.notContentRole.message";
-        }
+        /*
+         * if (ex instanceof DataIntegrityViolationException) {
+         * statusCode = HttpStatus.BAD_REQUEST;
+         * messageKey = "role.constraintViolation.message";
+         * }
+         */
 
-        if (ex instanceof DataIntegrityViolationException) {
-            statusCode = HttpStatus.BAD_REQUEST;
-            messageKey = "role.constraintViolation.message";
+        MessageResponseImpl messageResponseImpl = new MessageResponseImpl(messageSource, messageKey, null, null);
+        if (messageException == null) {
+            messageException = messageResponseImpl.getMessage();
         }
-        return new ResponseEntity<>(new MessageResponseImpl(messageSource, messageKey, null, null),
-                statusCode);
+        LoggerUtil.error(messageException, ex);
+        return new ResponseEntity<>(messageResponseImpl, statusCode);
     }
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<MessageResponse> handleResourceNotFoundException(ResourceNotFoundException ex,
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<MessageResponse> GlobalCustomException(CustomException ex,
             WebRequest request) {
-        return new ResponseEntity<>(new MessageResponseImpl(messageSource, ex.getResourceType(), null, null),
-                HttpStatus.NOT_FOUND);
+        String messageException = ex.getThrowable().getMessage();
+        String messageKey = ex.getKeyMessage();
+        Throwable throwable = ex.getThrowable();
+        HttpStatus statusCode = ex.getStatusCode();
+        MessageResponseImpl messageResponseImpl = new MessageResponseImpl(messageSource, messageKey, null, null);
+        if (messageException == null) {
+            messageException = messageResponseImpl.getMessage();
+        }
+        LoggerUtil.error(messageException, throwable);
+        return new ResponseEntity<>(messageResponseImpl, statusCode);
     }
 }

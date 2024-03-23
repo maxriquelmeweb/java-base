@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.riquelme.springbootcrudhibernaterestful.dtos.RoleDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.Role;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.CustomException;
 import com.riquelme.springbootcrudhibernaterestful.repositories.RoleRepository;
 import com.riquelme.springbootcrudhibernaterestful.services.RoleServiceImpl;
 import com.riquelme.springbootcrudhibernaterestful.util.EntityDtoMapper;
@@ -68,13 +69,13 @@ public class RoleServiceImplTests {
     @Test
     void whenSave_thenPersistRole() {
         Role role = new Role(null, "New Role");
-        RoleDTO roleDTO = new RoleDTO(1L, "New Role"); 
-    
+        RoleDTO roleDTO = new RoleDTO(1L, "New Role");
+
         when(roleRepository.save(any(Role.class))).thenReturn(role);
         when(entityDtoMapper.convertToDTO(any(Role.class), eq(RoleDTO.class))).thenReturn(roleDTO);
-    
+
         RoleDTO savedRoleDTO = roleService.save(role);
-    
+
         assertNotNull(savedRoleDTO);
         assertEquals("New Role", savedRoleDTO.getName());
     }
@@ -96,13 +97,17 @@ public class RoleServiceImplTests {
     @Test
     void whenDeleteById_thenRoleShouldBeDeleted() {
         Long id = 1L;
-        Role role = new Role(id, "Admin");
-    
-        when(roleRepository.findById(id)).thenReturn(Optional.of(role));
-    
+        when(roleRepository.existsById(id)).thenReturn(true);
         roleService.deleteById(id);
-    
         verify(roleRepository).deleteById(id);
+    }
+
+    @Test
+    void whenDeleteById_withNonExistingRole_thenThrowCustomException() {
+        Long id = 1L;
+        when(roleRepository.existsById(id)).thenReturn(false);
+        assertThrows(CustomException.class, () -> roleService.deleteById(id));
+        verify(roleRepository, never()).deleteById(id);
     }
 
     @Test
