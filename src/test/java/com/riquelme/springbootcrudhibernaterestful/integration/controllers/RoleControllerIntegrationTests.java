@@ -1,4 +1,4 @@
-package com.riquelme.springbootcrudhibernaterestful.integration.controller;
+package com.riquelme.springbootcrudhibernaterestful.integration.controllers;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -58,19 +58,19 @@ public class RoleControllerIntegrationTests {
                 @Test
                 void whenGetAllRoles_thenReturnsRolesList() throws Exception {
                         Role adminRole = new Role(1L, "Admin");
-                        adminRole.setCreated_at(
+                        adminRole.setCreatedAt(
                                         LocalDateTime.parse("2024-03-20T20:31:36.646439",
                                                         DateTimeFormatter.ISO_DATE_TIME));
-                        adminRole.setUpdated_at(
+                        adminRole.setUpdatedAt(
                                         LocalDateTime.parse("2024-03-20T20:31:36.646439",
                                                         DateTimeFormatter.ISO_DATE_TIME));
                         adminRole.setUsers(new HashSet<>());
 
                         Role userRole = new Role(2L, "User");
-                        userRole.setCreated_at(
+                        userRole.setCreatedAt(
                                         LocalDateTime.parse("2024-03-20T20:33:04.279875",
                                                         DateTimeFormatter.ISO_DATE_TIME));
-                        userRole.setUpdated_at(
+                        userRole.setUpdatedAt(
                                         LocalDateTime.parse("2024-03-20T20:33:04.279875",
                                                         DateTimeFormatter.ISO_DATE_TIME));
                         userRole.setUsers(new HashSet<>());
@@ -88,10 +88,10 @@ public class RoleControllerIntegrationTests {
                 @Test
                 void whenGetRole_thenReturnsRole() throws Exception {
                         Role role = new Role(1L, "Admin");
-                        role.setCreated_at(
+                        role.setCreatedAt(
                                         LocalDateTime.parse("2024-03-20T20:31:36.646439",
                                                         DateTimeFormatter.ISO_DATE_TIME));
-                        role.setUpdated_at(
+                        role.setUpdatedAt(
                                         LocalDateTime.parse("2024-03-20T20:31:36.646439",
                                                         DateTimeFormatter.ISO_DATE_TIME));
                         role.setUsers(new HashSet<>());
@@ -119,9 +119,9 @@ public class RoleControllerIntegrationTests {
                 @Test
                 void whenCreateRole_thenReturnsCreatedRole() throws Exception {
                         Role role = new Role(1L, "Admin");
-                        role.setCreated_at(LocalDateTime.parse("2024-03-20T20:31:36.646439",
+                        role.setCreatedAt(LocalDateTime.parse("2024-03-20T20:31:36.646439",
                                         DateTimeFormatter.ISO_DATE_TIME));
-                        role.setUpdated_at(LocalDateTime.parse("2024-03-20T20:31:36.646439",
+                        role.setUpdatedAt(LocalDateTime.parse("2024-03-20T20:31:36.646439",
                                         DateTimeFormatter.ISO_DATE_TIME));
                         role.setUsers(new HashSet<>());
 
@@ -164,10 +164,10 @@ public class RoleControllerIntegrationTests {
                 @Test
                 void whenUpdateRole_thenReturnsUpdatedRole() throws Exception {
                         Role updatedRole = new Role(1L, "AdminUpdated");
-                        updatedRole.setCreated_at(
+                        updatedRole.setCreatedAt(
                                         LocalDateTime.parse("2024-03-20T20:31:36.646439",
                                                         DateTimeFormatter.ISO_DATE_TIME));
-                        updatedRole.setUpdated_at(LocalDateTime.now());
+                        updatedRole.setUpdatedAt(LocalDateTime.now());
                         updatedRole.setUsers(new HashSet<>());
 
                         when(roleService.update(eq(1L), any(Role.class))).thenReturn(updatedRole);

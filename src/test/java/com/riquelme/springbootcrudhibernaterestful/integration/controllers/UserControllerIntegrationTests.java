@@ -1,4 +1,4 @@
-package com.riquelme.springbootcrudhibernaterestful.integration.controller;
+package com.riquelme.springbootcrudhibernaterestful.integration.controllers;
 
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.isA;
@@ -57,13 +57,13 @@ public class UserControllerIntegrationTests {
                 @Test
                 void whenGetAllUsers_thenReturnsUsersList() throws Exception {
                         User user1 = new User(1L, "John Doe", "Jackson", "john@example.com", "Ea.Pas41", true);
-                        user1.setCreated_at(LocalDateTime.now().minusDays(1));
-                        user1.setUpdated_at(LocalDateTime.now());
+                        user1.setCreatedAt(LocalDateTime.now().minusDays(1));
+                        user1.setUpdatedAt(LocalDateTime.now());
                         user1.setRoles(new HashSet<>());
 
                         User user2 = new User(2L, "Jane Doe", "Smith", "jane@example.com", "Ea.Pas42", true);
-                        user2.setCreated_at(LocalDateTime.now().minusDays(1));
-                        user2.setUpdated_at(LocalDateTime.now());
+                        user2.setCreatedAt(LocalDateTime.now().minusDays(1));
+                        user2.setUpdatedAt(LocalDateTime.now());
                         user2.setRoles(new HashSet<>());
 
                         when(userService.findAll()).thenReturn(Arrays.asList(user1, user2));
@@ -87,8 +87,8 @@ public class UserControllerIntegrationTests {
                 @Test
                 void whenGetUser_thenReturnsUser() throws Exception {
                         User user = new User(1L, "John Doe", "Jackson", "john@example.com", "Ea.Pas41", true);
-                        user.setCreated_at(LocalDateTime.now().minusDays(1));
-                        user.setUpdated_at(LocalDateTime.now());
+                        user.setCreatedAt(LocalDateTime.now().minusDays(1));
+                        user.setUpdatedAt(LocalDateTime.now());
                         user.setRoles(new HashSet<>());
 
                         when(userService.findById(1L)).thenReturn(user);
@@ -119,8 +119,8 @@ public class UserControllerIntegrationTests {
                 @Test
                 void whenCreateUser_thenReturnsCreatedUser() throws Exception {
                         User user = new User(1L, "Jane Doe", "Jackson", "jane@example.com", "12345", true);
-                        user.setCreated_at(LocalDateTime.now());
-                        user.setUpdated_at(LocalDateTime.now());
+                        user.setCreatedAt(LocalDateTime.now());
+                        user.setUpdatedAt(LocalDateTime.now());
                         user.setRoles(new HashSet<>());
 
                         when(userService.save(any(User.class))).thenReturn(user);
@@ -151,8 +151,8 @@ public class UserControllerIntegrationTests {
                 @Test
                 void whenCreateUserWithExistingEmail_thenReturnsBadRequest() throws Exception {
                         User existingUser = new User(1L, "Jane Doe", "Jackson", "jane@example.com", "12345", true);
-                        existingUser.setCreated_at(LocalDateTime.now());
-                        existingUser.setUpdated_at(LocalDateTime.now());
+                        existingUser.setCreatedAt(LocalDateTime.now());
+                        existingUser.setUpdatedAt(LocalDateTime.now());
                         existingUser.setRoles(new HashSet<>());
 
                         when(userService.existsByEmail("jane@example.com")).thenReturn(true);
@@ -172,8 +172,8 @@ public class UserControllerIntegrationTests {
                         User updatedUser = new User(1L, "Jane Doe Updated", "Jackson", "janeupdated@example.com",
                                         "12345",
                                         true);
-                        updatedUser.setCreated_at(LocalDateTime.now().minusDays(1)); // Por ejemplo, fue creado ayer
-                        updatedUser.setUpdated_at(LocalDateTime.now()); // Actualizado ahora
+                        updatedUser.setCreatedAt(LocalDateTime.now().minusDays(1)); // Por ejemplo, fue creado ayer
+                        updatedUser.setUpdatedAt(LocalDateTime.now()); // Actualizado ahora
                         updatedUser.setRoles(new HashSet<>());
 
                         when(userService.update(eq(1L), any(User.class))).thenReturn(updatedUser);
