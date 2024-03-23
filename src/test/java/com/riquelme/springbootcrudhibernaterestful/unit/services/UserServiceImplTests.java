@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,8 +16,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.riquelme.springbootcrudhibernaterestful.entities.Role;
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
 import com.riquelme.springbootcrudhibernaterestful.exceptions.ResourceNotFoundException;
+import com.riquelme.springbootcrudhibernaterestful.repositories.RoleRepository;
 import com.riquelme.springbootcrudhibernaterestful.repositories.UserRepository;
 import com.riquelme.springbootcrudhibernaterestful.services.UserServiceImpl;
 
@@ -25,6 +28,8 @@ public class UserServiceImplTests {
 
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private RoleRepository roleRepository;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -66,13 +71,27 @@ public class UserServiceImplTests {
     }
 
     @Test
-    void whenSave_thenPersistUser() {
-        when(userRepository.save(any(User.class))).thenReturn(user);
+    void whenSave_thenPersistUserAndAssignUserRole() {
+        // Preparar el rol "USER"
+        Role userRole = new Role(1L, "USER");
+        when(roleRepository.findById(1L)).thenReturn(Optional.of(userRole));
 
-        User savedUser = userService.save(user);
+        // Preparar el usuario para guardar
+        User newUser = new User(null, "New User", "Lastname", "newuser@example.com", "password123", true);
+
+        // Simular la respuesta de guardar, que incluye la asignación del rol "USER"
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            user.setRoles(new HashSet<>(Arrays.asList(userRole)));
+            return user;
+        });
+
+        // Llamar al método de guardar y verificar resultados
+        User savedUser = userService.save(newUser);
 
         assertNotNull(savedUser);
-        assertEquals("John", savedUser.getName());
+        assertEquals("New User", savedUser.getName());
+        assertTrue(savedUser.getRoles().contains(userRole), "The user should have the USER role assigned");
     }
 
     @Test
