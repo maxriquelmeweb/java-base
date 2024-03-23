@@ -108,6 +108,13 @@ public class UserServiceImpl implements UserService {
                         .orElseThrow(() -> new ResourceNotFoundException("role.error.notfound")))
                 .collect(Collectors.toSet());
 
+        // Verificar que todos los roles a remover realmente pertenecen al usuario
+        rolesToRemove.forEach(role -> {
+            if (!user.getRoles().contains(role)) {
+                throw new IllegalArgumentException();
+            }
+        });
+ 
         // Quitar los roles especificados del usuario
         user.getRoles().removeAll(rolesToRemove);
         return userRepository.save(user);
