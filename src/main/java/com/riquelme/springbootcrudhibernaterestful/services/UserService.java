@@ -3,22 +3,23 @@ package com.riquelme.springbootcrudhibernaterestful.services;
 import java.util.List;
 import java.util.Set;
 
+import com.riquelme.springbootcrudhibernaterestful.dtos.UserDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
 
 public interface UserService {
-  List<User> findAll();
+  List<UserDTO> findAll();
 
-  User findById(Long id);
+  UserDTO findById(Long id);
 
-  User save(User user);
+  UserDTO save(User user);
 
-  User update(Long id, User user);
+  UserDTO update(Long id, User user);
 
   void deleteById(Long id);
 
   boolean existsByEmail(String email);
 
-  User addRolesToUser(Long userId, Set<Long> roleIds);
+  UserDTO addRolesToUser(Long userId, Set<Long> roleIds);
 
-  User removeRolesFromUser(Long userId, Set<Long> roleIds);
+  UserDTO removeRolesFromUser(Long userId, Set<Long> roleIds);
 }

@@ -26,6 +26,9 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.riquelme.springbootcrudhibernaterestful.dtos.RoleIdsDTO;
+import com.riquelme.springbootcrudhibernaterestful.dtos.UserDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
 import com.riquelme.springbootcrudhibernaterestful.exceptions.ResourceNotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.services.UserService;
@@ -56,17 +59,12 @@ public class UserControllerIntegrationTests {
         class GetUsersTests {
                 @Test
                 void whenGetAllUsers_thenReturnsUsersList() throws Exception {
-                        User user1 = new User(1L, "John Doe", "Jackson", "john@example.com", "Ea.Pas41", true);
-                        user1.setCreatedAt(LocalDateTime.now().minusDays(1));
-                        user1.setUpdatedAt(LocalDateTime.now());
-                        user1.setRoles(new HashSet<>());
+                        UserDTO user1DTO = new UserDTO(1L, "John Doe", "Jackson", "john@example.com", true,
+                                        new HashSet<>());
+                        UserDTO user2DTO = new UserDTO(2L, "Jane Doe", "Smith", "jane@example.com", true,
+                                        new HashSet<>());
 
-                        User user2 = new User(2L, "Jane Doe", "Smith", "jane@example.com", "Ea.Pas42", true);
-                        user2.setCreatedAt(LocalDateTime.now().minusDays(1));
-                        user2.setUpdatedAt(LocalDateTime.now());
-                        user2.setRoles(new HashSet<>());
-
-                        when(userService.findAll()).thenReturn(Arrays.asList(user1, user2));
+                        when(userService.findAll()).thenReturn(Arrays.asList(user1DTO, user2DTO));
 
                         mockMvc.perform(get("/api/users"))
                                         .andExpect(status().isOk())
@@ -86,12 +84,10 @@ public class UserControllerIntegrationTests {
 
                 @Test
                 void whenGetUser_thenReturnsUser() throws Exception {
-                        User user = new User(1L, "John Doe", "Jackson", "john@example.com", "Ea.Pas41", true);
-                        user.setCreatedAt(LocalDateTime.now().minusDays(1));
-                        user.setUpdatedAt(LocalDateTime.now());
-                        user.setRoles(new HashSet<>());
+                        UserDTO userDTO = new UserDTO(1L, "John Doe", "Jackson", "john@example.com", true,
+                                        new HashSet<>());
 
-                        when(userService.findById(1L)).thenReturn(user);
+                        when(userService.findById(1L)).thenReturn(userDTO);
 
                         mockMvc.perform(get("/api/users/1"))
                                         .andExpect(status().isOk())
@@ -118,20 +114,18 @@ public class UserControllerIntegrationTests {
         class CreateUserTests {
                 @Test
                 void whenCreateUser_thenReturnsCreatedUser() throws Exception {
-                        User user = new User(1L, "Jane Doe", "Jackson", "jane@example.com", "12345", true);
-                        user.setCreatedAt(LocalDateTime.now());
-                        user.setUpdatedAt(LocalDateTime.now());
-                        user.setRoles(new HashSet<>());
+                        UserDTO userDTO = new UserDTO(1L, "John Doe", "Jackson", "john@example.com", true,
+                                        new HashSet<>());
 
-                        when(userService.save(any(User.class))).thenReturn(user);
+                        when(userService.save(any(User.class))).thenReturn(userDTO);
 
                         mockMvc.perform(post("/api/users")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content("{\"name\":\"Jane Doe\",\"lastname\":\"Jackson\",\"email\":\"jane@example.com\",\"password\":\"12345\",\"active\":true}"))
                                         .andExpect(status().isCreated())
-                                        .andExpect(jsonPath("$.data.name", is(user.getName())))
+                                        .andExpect(jsonPath("$.data.name", is(userDTO.getName())))
                                         .andExpect(jsonPath("$.data.lastname", is("Jackson")))
-                                        .andExpect(jsonPath("$.data.email", is(user.getEmail())))
+                                        .andExpect(jsonPath("$.data.email", is(userDTO.getEmail())))
                                         .andExpect(jsonPath("$.data.active", is(true)))
                                         .andExpect(jsonPath("$.data.roles", isA(List.class)))
                                         .andExpect(jsonPath("$.message", is(getMessage("user.createUser.success"))));
@@ -169,22 +163,18 @@ public class UserControllerIntegrationTests {
         class UpdateUserTests {
                 @Test
                 void whenUpdateUser_thenReturnsUpdatedUser() throws Exception {
-                        User updatedUser = new User(1L, "Jane Doe Updated", "Jackson", "janeupdated@example.com",
-                                        "12345",
-                                        true);
-                        updatedUser.setCreatedAt(LocalDateTime.now().minusDays(1)); // Por ejemplo, fue creado ayer
-                        updatedUser.setUpdatedAt(LocalDateTime.now()); // Actualizado ahora
-                        updatedUser.setRoles(new HashSet<>());
+                        UserDTO userDTO = new UserDTO(1L, "John Doe", "Jackson", "john@example.com", true,
+                                        new HashSet<>());
 
-                        when(userService.update(eq(1L), any(User.class))).thenReturn(updatedUser);
+                        when(userService.update(eq(1L), any(User.class))).thenReturn(userDTO);
 
                         mockMvc.perform(put("/api/users/1")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content("{\"name\":\"Jane Doe Updated\",\"lastname\":\"Jackson\",\"email\":\"janeupdated@example.com\",\"password\":\"12345\",\"active\":true}"))
                                         .andExpect(status().isOk())
-                                        .andExpect(jsonPath("$.data.name", is(updatedUser.getName())))
+                                        .andExpect(jsonPath("$.data.name", is(userDTO.getName())))
                                         .andExpect(jsonPath("$.data.lastname", is("Jackson")))
-                                        .andExpect(jsonPath("$.data.email", is(updatedUser.getEmail())))
+                                        .andExpect(jsonPath("$.data.email", is(userDTO.getEmail())))
                                         .andExpect(jsonPath("$.data.active", is(true)))
                                         .andExpect(jsonPath("$.data.roles", isA(List.class)))
                                         .andExpect(jsonPath("$.message", is(getMessage("user.updateUser.success"))));
@@ -199,6 +189,48 @@ public class UserControllerIntegrationTests {
                         mockMvc.perform(delete("/api/users/1"))
                                         .andExpect(status().isNoContent())
                                         .andExpect(jsonPath("$.data").doesNotExist());
+                }
+        }
+
+        @Nested
+        class RoleManagementTests {
+
+                @Test
+                void whenAddRolesToUser_thenReturnsUpdatedUser() throws Exception {
+                        Long userId = 1L;
+                        RoleIdsDTO roleIdsDTO = new RoleIdsDTO();
+                        roleIdsDTO.setRoleIds(new HashSet<>(Arrays.asList(1L, 2L)));
+
+                        UserDTO userWithRoles = new UserDTO();
+                        userWithRoles.setId(userId);
+
+                        when(userService.addRolesToUser(eq(userId), anySet())).thenReturn(userWithRoles);
+
+                        mockMvc.perform(post("/api/users/{userId}/roles", userId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(new ObjectMapper().writeValueAsString(roleIdsDTO)))
+                                        .andExpect(status().isOk())
+                                        .andExpect(jsonPath("$.data").isNotEmpty())
+                                        .andExpect(jsonPath("$.message", is(getMessage("user.addRoles.success"))));
+                }
+
+                @Test
+                void whenRemoveRolesFromUser_thenReturnsUpdatedUser() throws Exception {
+                        Long userId = 1L;
+                        RoleIdsDTO roleIdsDTO = new RoleIdsDTO();
+                        roleIdsDTO.setRoleIds(new HashSet<>(Arrays.asList(1L, 2L)));
+
+                        UserDTO userWithoutRoles = new UserDTO();
+                        userWithoutRoles.setId(userId);
+
+                        when(userService.removeRolesFromUser(eq(userId), anySet())).thenReturn(userWithoutRoles);
+
+                        mockMvc.perform(delete("/api/users/{userId}/roles", userId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(new ObjectMapper().writeValueAsString(roleIdsDTO)))
+                                        .andExpect(status().isOk())
+                                        .andExpect(jsonPath("$.data").isNotEmpty())
+                                        .andExpect(jsonPath("$.message", is(getMessage("user.removeRoles.success"))));
                 }
         }
 

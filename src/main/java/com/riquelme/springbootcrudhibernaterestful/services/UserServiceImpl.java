@@ -10,53 +10,61 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.riquelme.springbootcrudhibernaterestful.dtos.UserDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.Role;
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
 import com.riquelme.springbootcrudhibernaterestful.exceptions.ResourceNotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.repositories.RoleRepository;
 import com.riquelme.springbootcrudhibernaterestful.repositories.UserRepository;
+import com.riquelme.springbootcrudhibernaterestful.util.EntityDtoMapper;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final EntityDtoMapper entityDtoMapper;
 
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
+            EntityDtoMapper entityDtoMapper) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.entityDtoMapper = entityDtoMapper;
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<User> findAll() {
-        return (List<User>) userRepository.findAll();
+    public List<UserDTO> findAll() {
+        List<User> users = (List<User>) userRepository.findAll();
+        return users.stream()
+                .map(user -> entityDtoMapper.convertToDTO(user, UserDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     @Override
-    public User findById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("user.error.notfound"));
+    public UserDTO findById(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("user.error.notfound"));
+        return entityDtoMapper.convertToDTO(user, UserDTO.class);
     }
 
     @Transactional
     @Override
-    public User save(User user) {
+    public UserDTO save(User user) {
         // Buscar el rol "USER" por ID o nombre. Asumimos que el rol con ID 1 es "USER".
         Role userRole = roleRepository.findById(1L)
-                .orElseThrow(() -> new ResourceNotFoundException("role.error.notfound"));
-
+                .orElseThrow(() -> new ResourceNotFoundException("user.error.notfound"));
         // Asignar el rol al nuevo usuario
         user.setRoles(new HashSet<>(Arrays.asList(userRole)));
-
-        return userRepository.save(user);
+        User newUser = userRepository.save(user);
+        return entityDtoMapper.convertToDTO(newUser, UserDTO.class);
     }
 
     @Transactional
     @Override
-    public User update(Long id, User user) {
-        User userDb = findById(id);
+    public UserDTO update(Long id, User user) {
+        User userDb = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("user.error.notfound"));
         userDb.setName(user.getName());
         userDb.setLastname(user.getLastname());
         userDb.setEmail(user.getEmail());
@@ -65,14 +73,14 @@ public class UserServiceImpl implements UserService {
             userDb.setPassword(user.getPassword());
         }
         userDb.setUpdatedAt(LocalDateTime.now());
-        return userRepository.save(userDb);
+        User updateUser = userRepository.save(userDb);
+        return entityDtoMapper.convertToDTO(updateUser, UserDTO.class);
     }
 
     @Transactional
     @Override
     public void deleteById(Long id) {
-        User userDb = findById(id);
-        userRepository.delete(userDb);
+        userRepository.deleteById(id);
     }
 
     @Transactional(readOnly = true)
@@ -83,23 +91,28 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User addRolesToUser(Long userId, Set<Long> roleIds) {
+    public UserDTO addRolesToUser(Long userId, Set<Long> roleIds) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("user.error.notfound"));
-
-        Set<Role> roles = roleIds.stream()
+        Set<Role> existingRoles = user.getRoles();
+        Set<Role> rolesToAdd = roleIds.stream()
                 .map(roleId -> roleRepository.findById(roleId)
                         .orElseThrow(() -> new ResourceNotFoundException("role.error.notfound")))
+                .filter(newRole -> existingRoles.stream()
+                        .noneMatch(existingRole -> existingRole.getId().equals(newRole.getId())))
                 .collect(Collectors.toSet());
-
+        if (rolesToAdd.isEmpty()) {
+            throw new ResourceNotFoundException("existsByNameRole.message");
+        }
         // Añadir nuevos roles al usuario
-        user.getRoles().addAll(roles);
-        return userRepository.save(user);
+        user.getRoles().addAll(rolesToAdd);
+        User updateUser = userRepository.save(user);
+        return entityDtoMapper.convertToDTO(updateUser, UserDTO.class);
     }
 
     @Override
     @Transactional
-    public User removeRolesFromUser(Long userId, Set<Long> roleIds) {
+    public UserDTO removeRolesFromUser(Long userId, Set<Long> roleIds) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("user.error.notfound"));
 
@@ -114,9 +127,11 @@ public class UserServiceImpl implements UserService {
                 throw new IllegalArgumentException();
             }
         });
- 
+
         // Quitar los roles especificados del usuario
         user.getRoles().removeAll(rolesToRemove);
-        return userRepository.save(user);
+
+        User updateUser = userRepository.save(user);
+        return entityDtoMapper.convertToDTO(updateUser, UserDTO.class);
     }
 }
