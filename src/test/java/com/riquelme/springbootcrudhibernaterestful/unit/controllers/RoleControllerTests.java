@@ -105,4 +105,5 @@ public class RoleControllerTests {
             assertEquals(NO_CONTENT, response.getStatusCode());
         }
     }
+    
 }

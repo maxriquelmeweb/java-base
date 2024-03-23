@@ -26,6 +26,8 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.riquelme.springbootcrudhibernaterestful.dtos.RoleIdsDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
 import com.riquelme.springbootcrudhibernaterestful.exceptions.ResourceNotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.services.UserService;
@@ -199,6 +201,51 @@ public class UserControllerIntegrationTests {
                         mockMvc.perform(delete("/api/users/1"))
                                         .andExpect(status().isNoContent())
                                         .andExpect(jsonPath("$.data").doesNotExist());
+                }
+        }
+
+        @Nested
+        class RoleManagementTests {
+
+                @Test
+                void whenAddRolesToUser_thenReturnsUpdatedUser() throws Exception {
+                        Long userId = 1L;
+                        RoleIdsDTO roleIdsDTO = new RoleIdsDTO();
+                        roleIdsDTO.setRoleIds(new HashSet<>(Arrays.asList(1L, 2L)));
+
+                        User userWithRoles = new User();
+                        userWithRoles.setId(userId);
+                        // Configura el usuario con roles según lo esperado después de agregar los roles
+
+                        when(userService.addRolesToUser(eq(userId), anySet())).thenReturn(userWithRoles);
+
+                        mockMvc.perform(post("/api/users/{userId}/roles", userId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(new ObjectMapper().writeValueAsString(roleIdsDTO)))
+                                        .andExpect(status().isOk())
+                                        .andExpect(jsonPath("$.data").isNotEmpty())
+                                        .andExpect(jsonPath("$.message", is(getMessage("user.addRoles.success"))));
+                }
+
+                @Test
+                void whenRemoveRolesFromUser_thenReturnsUpdatedUser() throws Exception {
+                        Long userId = 1L;
+                        RoleIdsDTO roleIdsDTO = new RoleIdsDTO();
+                        roleIdsDTO.setRoleIds(new HashSet<>(Arrays.asList(1L, 2L)));
+
+                        User userWithoutRoles = new User();
+                        userWithoutRoles.setId(userId);
+                        // Configura el usuario sin los roles según lo esperado después de remover los
+                        // roles
+
+                        when(userService.removeRolesFromUser(eq(userId), anySet())).thenReturn(userWithoutRoles);
+
+                        mockMvc.perform(delete("/api/users/{userId}/roles", userId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(new ObjectMapper().writeValueAsString(roleIdsDTO)))
+                                        .andExpect(status().isOk())
+                                        .andExpect(jsonPath("$.data").isNotEmpty())
+                                        .andExpect(jsonPath("$.message", is(getMessage("user.removeRoles.success"))));
                 }
         }
 

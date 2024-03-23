@@ -23,6 +23,7 @@ import com.riquelme.springbootcrudhibernaterestful.responses.MessageResponseImpl
 import com.riquelme.springbootcrudhibernaterestful.services.RoleService;
 import com.riquelme.springbootcrudhibernaterestful.util.EntityDtoMapper;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 
@@ -37,6 +38,7 @@ public class RoleController extends BaseController {
         this.roleService = roleService;
     }
 
+    @Transactional
     @GetMapping
     public ResponseEntity<MessageResponse> getRoles() {
         List<Role> roles = roleService.findAll();
@@ -46,6 +48,7 @@ public class RoleController extends BaseController {
         return ResponseEntity.ok(new MessageResponseImpl(messageSource, "role.getRoles.success", rolesDTO, null));
     }
 
+    @Transactional
     @GetMapping("/{id}")
     public ResponseEntity<MessageResponse> getRole(@PathVariable @Min(1) Long id) {
         Role role = roleService.findById(id);
@@ -54,6 +57,7 @@ public class RoleController extends BaseController {
                         EntityDtoMapper.convertToDTO(role, RoleDTO.class), null));
     }
 
+    @Transactional
     @PostMapping
     public ResponseEntity<MessageResponse> createRole(@Valid @RequestBody Role role, BindingResult result) {
         if (result.hasErrors()) {
@@ -66,6 +70,7 @@ public class RoleController extends BaseController {
                         null));
     }
 
+    @Transactional
     @PutMapping("/{id}")
     public ResponseEntity<MessageResponse> updateRole(@PathVariable @Min(1) Long id,
             @Valid @RequestBody Role role,

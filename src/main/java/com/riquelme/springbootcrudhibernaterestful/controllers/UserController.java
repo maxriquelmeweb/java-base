@@ -24,6 +24,7 @@ import com.riquelme.springbootcrudhibernaterestful.responses.MessageResponseImpl
 import com.riquelme.springbootcrudhibernaterestful.services.UserService;
 import com.riquelme.springbootcrudhibernaterestful.util.EntityDtoMapper;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 
@@ -38,6 +39,7 @@ public class UserController extends BaseController {
         this.userService = userService;
     }
 
+    @Transactional
     @GetMapping
     public ResponseEntity<MessageResponse> getUsers() {
         List<User> users = userService.findAll();
@@ -47,6 +49,7 @@ public class UserController extends BaseController {
         return ResponseEntity.ok(new MessageResponseImpl(messageSource, "user.getUsers.success", userDTOs, null));
     }
 
+    @Transactional
     @GetMapping("/{id}")
     public ResponseEntity<MessageResponse> getUser(@PathVariable @Min(1) Long id) {
         User user = userService.findById(id);
@@ -55,6 +58,7 @@ public class UserController extends BaseController {
                         EntityDtoMapper.convertToDTO(user, UserDTO.class), null));
     }
 
+    @Transactional
     @PostMapping
     public ResponseEntity<MessageResponse> createUser(@Valid @RequestBody User user, BindingResult result) {
         if (result.hasFieldErrors()) {
@@ -67,6 +71,7 @@ public class UserController extends BaseController {
                         null));
     }
 
+    @Transactional
     @PutMapping("/{id}")
     public ResponseEntity<MessageResponse> updateUser(@PathVariable @Min(1) Long id, @Valid @RequestBody User user,
             BindingResult result) {
@@ -86,6 +91,7 @@ public class UserController extends BaseController {
         return ResponseEntity.noContent().build();
     }
 
+    @Transactional
     @PostMapping("/{userId}/roles")
     public ResponseEntity<MessageResponse> addRolesToUser(@PathVariable @Min(1) Long userId,
             @RequestBody RoleIdsDTO roleIdsDTO) {
@@ -94,6 +100,7 @@ public class UserController extends BaseController {
                 EntityDtoMapper.convertToDTO(user, UserDTO.class), null));
     }
 
+    @Transactional
     @DeleteMapping("/{userId}/roles")
     public ResponseEntity<MessageResponse> removeRolesFromUser(@PathVariable @Min(1) Long userId,
             @RequestBody RoleIdsDTO roleIdsDTO) {

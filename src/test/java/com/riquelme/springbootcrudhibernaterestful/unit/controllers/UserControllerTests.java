@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.*;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,12 +17,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 
 import com.riquelme.springbootcrudhibernaterestful.controllers.UserController;
+import com.riquelme.springbootcrudhibernaterestful.dtos.RoleIdsDTO;
 import com.riquelme.springbootcrudhibernaterestful.dtos.UserDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.ResourceNotFoundException;
+import com.riquelme.springbootcrudhibernaterestful.repositories.UserRepository;
 import com.riquelme.springbootcrudhibernaterestful.responses.MessageResponse;
 import com.riquelme.springbootcrudhibernaterestful.services.UserService;
 
@@ -30,6 +35,9 @@ public class UserControllerTests {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private BindingResult bindingResult;
@@ -103,6 +111,58 @@ public class UserControllerTests {
         public void deleteUserTest() {
             ResponseEntity<?> response = userController.deleteUser(1L);
             assertEquals(NO_CONTENT, response.getStatusCode());
+        }
+    }
+
+    @Nested
+    class RoleManagementTests {
+
+        @Test
+        void whenAddRolesToUser_thenReturnsUpdatedUser() {
+            Long userId = 1L;
+            RoleIdsDTO roleIdsDTO = new RoleIdsDTO();
+            roleIdsDTO.setRoleIds(new HashSet<>(Arrays.asList(1L, 2L)));
+
+            when(userService.addRolesToUser(eq(userId), anySet())).thenReturn(user);
+
+            ResponseEntity<MessageResponse> response = userController.addRolesToUser(userId, roleIdsDTO);
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            assertNotNull(response.getBody().getData());
+        }
+
+        @Test
+        void whenRemoveRolesFromUser_thenReturnsUpdatedUser() {
+            Long userId = 1L;
+            RoleIdsDTO roleIdsDTO = new RoleIdsDTO();
+            roleIdsDTO.setRoleIds(new HashSet<>(Arrays.asList(1L, 2L)));
+
+            when(userService.removeRolesFromUser(eq(userId), anySet())).thenReturn(user);
+
+            ResponseEntity<MessageResponse> response = userController.removeRolesFromUser(userId, roleIdsDTO);
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            assertNotNull(response.getBody().getData());
+        }
+
+        @Test
+        void whenAddRolesToUserWithInvalidUserId_thenHandleError() {
+            Long invalidUserId = 999L; // Asumiendo que este ID es inválido
+            RoleIdsDTO roleIdsDTO = new RoleIdsDTO();
+            roleIdsDTO.setRoleIds(new HashSet<>(Arrays.asList(1L, 2L)));
+
+            // Asegúrate de que el usuario es nulo o lanza una excepción adecuada para
+            // simular un usuario no encontrado.
+            when(userService.addRolesToUser(eq(invalidUserId), anySet()))
+                    .thenThrow(new ResourceNotFoundException("user.error.notfound"));
+
+            // Intenta realizar la llamada al controlador y espera la excepción o una
+            // respuesta adecuada.
+            Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
+                userController.addRolesToUser(invalidUserId, roleIdsDTO);
+            });
+
+            // Verifica que se lanzó la excepción correcta
+            assertNotNull(exception);
+            assertEquals(exception.getMessage(), new ResourceNotFoundException("user.error.notfound").getMessage());
         }
     }
 }
