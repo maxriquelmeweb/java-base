@@ -7,14 +7,12 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Locale;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -25,9 +23,11 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.riquelme.springbootcrudhibernaterestful.dtos.RoleDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.Role;
 import com.riquelme.springbootcrudhibernaterestful.exceptions.ResourceNotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.services.RoleService;
+import com.riquelme.springbootcrudhibernaterestful.util.EntityDtoMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -39,6 +39,9 @@ public class RoleControllerIntegrationTests {
 
         @MockBean
         private RoleService roleService;
+
+        @Mock
+        private EntityDtoMapper entityDtoMapper;
 
         @Autowired
         private MessageSource messageSource;
@@ -57,25 +60,10 @@ public class RoleControllerIntegrationTests {
         class GetRolesTests {
                 @Test
                 void whenGetAllRoles_thenReturnsRolesList() throws Exception {
-                        Role adminRole = new Role(1L, "Admin");
-                        adminRole.setCreatedAt(
-                                        LocalDateTime.parse("2024-03-20T20:31:36.646439",
-                                                        DateTimeFormatter.ISO_DATE_TIME));
-                        adminRole.setUpdatedAt(
-                                        LocalDateTime.parse("2024-03-20T20:31:36.646439",
-                                                        DateTimeFormatter.ISO_DATE_TIME));
-                        adminRole.setUsers(new HashSet<>());
+                        RoleDTO adminRoleDTO = new RoleDTO(1L, "Admin");
+                        RoleDTO userRoleDTO = new RoleDTO(2L, "User");
 
-                        Role userRole = new Role(2L, "User");
-                        userRole.setCreatedAt(
-                                        LocalDateTime.parse("2024-03-20T20:33:04.279875",
-                                                        DateTimeFormatter.ISO_DATE_TIME));
-                        userRole.setUpdatedAt(
-                                        LocalDateTime.parse("2024-03-20T20:33:04.279875",
-                                                        DateTimeFormatter.ISO_DATE_TIME));
-                        userRole.setUsers(new HashSet<>());
-
-                        when(roleService.findAll()).thenReturn(Arrays.asList(adminRole, userRole));
+                        when(roleService.findAll()).thenReturn(Arrays.asList(adminRoleDTO, userRoleDTO));
 
                         mockMvc.perform(get("/api/roles"))
                                         .andExpect(status().isOk())
@@ -87,19 +75,12 @@ public class RoleControllerIntegrationTests {
 
                 @Test
                 void whenGetRole_thenReturnsRole() throws Exception {
-                        Role role = new Role(1L, "Admin");
-                        role.setCreatedAt(
-                                        LocalDateTime.parse("2024-03-20T20:31:36.646439",
-                                                        DateTimeFormatter.ISO_DATE_TIME));
-                        role.setUpdatedAt(
-                                        LocalDateTime.parse("2024-03-20T20:31:36.646439",
-                                                        DateTimeFormatter.ISO_DATE_TIME));
-                        role.setUsers(new HashSet<>());
+                        RoleDTO roleDTO = new RoleDTO(1L, "Admin");
 
-                        when(roleService.findById(1L)).thenReturn(role);
+                        when(roleService.findById(1L)).thenReturn(roleDTO);
                         mockMvc.perform(get("/api/roles/1"))
                                         .andExpect(status().isOk())
-                                        .andExpect(jsonPath("$.data.name", is(role.getName())))
+                                        .andExpect(jsonPath("$.data.name", is(roleDTO.getName())))
                                         .andExpect(jsonPath("$.message", is(getMessage("role.getRole.success"))));
                 }
 
@@ -118,20 +99,13 @@ public class RoleControllerIntegrationTests {
         class CreateRoleTests {
                 @Test
                 void whenCreateRole_thenReturnsCreatedRole() throws Exception {
-                        Role role = new Role(1L, "Admin");
-                        role.setCreatedAt(LocalDateTime.parse("2024-03-20T20:31:36.646439",
-                                        DateTimeFormatter.ISO_DATE_TIME));
-                        role.setUpdatedAt(LocalDateTime.parse("2024-03-20T20:31:36.646439",
-                                        DateTimeFormatter.ISO_DATE_TIME));
-                        role.setUsers(new HashSet<>());
-
-                        when(roleService.save(any(Role.class))).thenReturn(role);
-
+                        RoleDTO roleDTO = new RoleDTO(1L, "Admin");
+                        when(roleService.save(any(Role.class))).thenReturn(roleDTO);
                         mockMvc.perform(post("/api/roles")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content("{\"name\":\"Admin\"}"))
                                         .andExpect(status().isCreated())
-                                        .andExpect(jsonPath("$.data.name", is(role.getName())))
+                                        .andExpect(jsonPath("$.data.name", is(roleDTO.getName())))
                                         .andExpect(jsonPath("$.message", is(getMessage("role.createRole.success"))));
                 }
 
@@ -163,20 +137,15 @@ public class RoleControllerIntegrationTests {
         class UpdateRoleTests {
                 @Test
                 void whenUpdateRole_thenReturnsUpdatedRole() throws Exception {
-                        Role updatedRole = new Role(1L, "AdminUpdated");
-                        updatedRole.setCreatedAt(
-                                        LocalDateTime.parse("2024-03-20T20:31:36.646439",
-                                                        DateTimeFormatter.ISO_DATE_TIME));
-                        updatedRole.setUpdatedAt(LocalDateTime.now());
-                        updatedRole.setUsers(new HashSet<>());
+                        RoleDTO updatedRoleDTO = new RoleDTO(1L, "AdminUpdated");
 
-                        when(roleService.update(eq(1L), any(Role.class))).thenReturn(updatedRole);
+                        when(roleService.update(eq(1L), any(Role.class))).thenReturn(updatedRoleDTO);
 
                         mockMvc.perform(put("/api/roles/1")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content("{\"name\":\"AdminUpdated\"}"))
                                         .andExpect(status().isOk())
-                                        .andExpect(jsonPath("$.data.name", is(updatedRole.getName())))
+                                        .andExpect(jsonPath("$.data.name", is(updatedRoleDTO.getName())))
                                         .andExpect(jsonPath("$.message", is(getMessage("role.updateRole.success"))));
                 }
         }

@@ -1,7 +1,6 @@
 package com.riquelme.springbootcrudhibernaterestful.controllers;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -22,9 +21,7 @@ import com.riquelme.springbootcrudhibernaterestful.entities.User;
 import com.riquelme.springbootcrudhibernaterestful.responses.MessageResponse;
 import com.riquelme.springbootcrudhibernaterestful.responses.MessageResponseImpl;
 import com.riquelme.springbootcrudhibernaterestful.services.UserService;
-import com.riquelme.springbootcrudhibernaterestful.util.EntityDtoMapper;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 
@@ -39,50 +36,37 @@ public class UserController extends BaseController {
         this.userService = userService;
     }
 
-    @Transactional
     @GetMapping
     public ResponseEntity<MessageResponse> getUsers() {
-        List<User> users = userService.findAll();
-        List<UserDTO> userDTOs = users.stream()
-                .map(user -> EntityDtoMapper.convertToDTO(user, UserDTO.class))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "user.getUsers.success", userDTOs, null));
+        List<UserDTO> usersDTO = userService.findAll();
+        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "user.getUsers.success", usersDTO, null));
     }
 
-    @Transactional
     @GetMapping("/{id}")
     public ResponseEntity<MessageResponse> getUser(@PathVariable @Min(1) Long id) {
-        User user = userService.findById(id);
-        return ResponseEntity
-                .ok(new MessageResponseImpl(messageSource, "user.getUser.success",
-                        EntityDtoMapper.convertToDTO(user, UserDTO.class), null));
+        UserDTO userDTO = userService.findById(id);
+        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "user.getUser.success", userDTO, null));
     }
 
-    @Transactional
     @PostMapping
     public ResponseEntity<MessageResponse> createUser(@Valid @RequestBody User user, BindingResult result) {
         if (result.hasFieldErrors()) {
             return handleValidationErrors(result);
         }
-        User newUser = userService.save(user);
+        UserDTO newUser = userService.save(user);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new MessageResponseImpl(messageSource, "user.createUser.success",
-                        EntityDtoMapper.convertToDTO(newUser, UserDTO.class),
-                        null));
+                .body(new MessageResponseImpl(messageSource, "user.createUser.success", newUser, null));
     }
 
-    @Transactional
     @PutMapping("/{id}")
     public ResponseEntity<MessageResponse> updateUser(@PathVariable @Min(1) Long id, @Valid @RequestBody User user,
             BindingResult result) {
         if (result.hasFieldErrors()) {
             return handleValidationErrors(result);
         }
-        User updateUser = userService.update(id, user);
+        UserDTO updateUserDTO = userService.update(id, user);
         return ResponseEntity
-                .ok(new MessageResponseImpl(messageSource, "user.updateUser.success",
-                        EntityDtoMapper.convertToDTO(updateUser, UserDTO.class),
-                        null));
+                .ok(new MessageResponseImpl(messageSource, "user.updateUser.success", updateUserDTO, null));
     }
 
     @DeleteMapping("/{id}")
@@ -91,21 +75,17 @@ public class UserController extends BaseController {
         return ResponseEntity.noContent().build();
     }
 
-    @Transactional
     @PostMapping("/{userId}/roles")
     public ResponseEntity<MessageResponse> addRolesToUser(@PathVariable @Min(1) Long userId,
             @RequestBody RoleIdsDTO roleIdsDTO) {
-        User user = userService.addRolesToUser(userId, roleIdsDTO.getRoleIds());
-        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "user.addRoles.success",
-                EntityDtoMapper.convertToDTO(user, UserDTO.class), null));
+        UserDTO userDTO = userService.addRolesToUser(userId, roleIdsDTO.getRoleIds());
+        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "user.addRoles.success", userDTO, null));
     }
 
-    @Transactional
     @DeleteMapping("/{userId}/roles")
     public ResponseEntity<MessageResponse> removeRolesFromUser(@PathVariable @Min(1) Long userId,
             @RequestBody RoleIdsDTO roleIdsDTO) {
-        User user = userService.removeRolesFromUser(userId, roleIdsDTO.getRoleIds());
-        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "user.removeRoles.success",
-                EntityDtoMapper.convertToDTO(user, UserDTO.class), null));
+        UserDTO userDTO = userService.removeRolesFromUser(userId, roleIdsDTO.getRoleIds());
+        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "user.removeRoles.success", userDTO, null));
     }
 }

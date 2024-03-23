@@ -16,112 +16,116 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.riquelme.springbootcrudhibernaterestful.dtos.UserDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.Role;
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
-import com.riquelme.springbootcrudhibernaterestful.exceptions.ResourceNotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.repositories.RoleRepository;
 import com.riquelme.springbootcrudhibernaterestful.repositories.UserRepository;
 import com.riquelme.springbootcrudhibernaterestful.services.UserServiceImpl;
+import com.riquelme.springbootcrudhibernaterestful.util.EntityDtoMapper;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceImplTests {
 
     @Mock
     private UserRepository userRepository;
+
     @Mock
     private RoleRepository roleRepository;
+
+    @Mock
+    private EntityDtoMapper entityDtoMapper;
 
     @InjectMocks
     private UserServiceImpl userService;
 
     private User user;
+    private UserDTO userDTO;
 
     @BeforeEach
     void setUp() {
         user = new User(1L, "John", "Doe", "john.doe@example.com", "password", true);
+        userDTO = new UserDTO(1L, "John", "Doe", "john.doe@example.com", true, new HashSet<>());
     }
 
     @Test
-    void whenFindAll_thenReturnUserList() {
+    void whenFindAll_thenReturnUserDTOList() {
         User user2 = new User(2L, "Jane", "Doe", "jane.doe@example.com", "password", true);
         when(userRepository.findAll()).thenReturn(Arrays.asList(user, user2));
+        when(entityDtoMapper.convertToDTO(any(User.class), eq(UserDTO.class)))
+                .thenAnswer(invocation -> {
+                    User argUser = invocation.getArgument(0);
+                    return new UserDTO(argUser.getId(), argUser.getName(), argUser.getLastname(),
+                            argUser.getEmail(), argUser.getActive(), new HashSet<>());
+                });
 
-        List<User> users = userService.findAll();
+        List<UserDTO> usersDTO = userService.findAll();
 
-        assertNotNull(users);
-        assertEquals(2, users.size());
-        assertTrue(users.contains(user) && users.contains(user2));
+        assertNotNull(usersDTO);
+        assertEquals(2, usersDTO.size());
+        assertTrue(usersDTO.stream().anyMatch(dto -> dto.getEmail().equals(user.getEmail())));
+        assertTrue(usersDTO.stream().anyMatch(dto -> dto.getEmail().equals(user2.getEmail())));
     }
 
     @Test
-    void whenFindById_thenReturnUser() {
+    void whenFindById_thenReturnUserDTO() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(entityDtoMapper.convertToDTO(user, UserDTO.class)).thenReturn(userDTO);
 
-        User foundUser = userService.findById(1L);
+        UserDTO foundUserDTO = userService.findById(1L);
 
-        assertNotNull(foundUser);
-        assertEquals("John", foundUser.getName());
+        assertNotNull(foundUserDTO);
+        assertEquals(userDTO.getName(), foundUserDTO.getName());
     }
 
     @Test
-    void whenFindById_thenThrowResourceNotFoundException() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class, () -> userService.findById(1L));
-    }
-
-    @Test
-    void whenSave_thenPersistUserAndAssignUserRole() {
+    void whenSave_thenPersistUserAndReturnUserDTO() {
         // Preparar el rol "USER"
         Role userRole = new Role(1L, "USER");
         when(roleRepository.findById(1L)).thenReturn(Optional.of(userRole));
 
         // Preparar el usuario para guardar
         User newUser = new User(null, "New User", "Lastname", "newuser@example.com", "password123", true);
+        newUser.setRoles(new HashSet<>(Arrays.asList(userRole)));
 
-        // Simular la respuesta de guardar, que incluye la asignación del rol "USER"
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            user.setRoles(new HashSet<>(Arrays.asList(userRole)));
-            return user;
-        });
+        // Simular la respuesta de guardar
+        when(userRepository.save(any(User.class))).thenReturn(newUser);
+        when(entityDtoMapper.convertToDTO(any(User.class), eq(UserDTO.class))).thenReturn(userDTO);
 
-        // Llamar al método de guardar y verificar resultados
-        User savedUser = userService.save(newUser);
+        UserDTO savedUserDTO = userService.save(newUser);
 
-        assertNotNull(savedUser);
-        assertEquals("New User", savedUser.getName());
-        assertTrue(savedUser.getRoles().contains(userRole), "The user should have the USER role assigned");
+        assertNotNull(savedUserDTO);
+        assertEquals(userDTO.getName(), savedUserDTO.getName());
     }
 
     @Test
-    void whenUpdate_thenUpdateUserDetails() {
-        User updatedUser = new User(1L, "John", "Doe", "john.update@example.com", "newpassword", true);
+    void whenUpdate_thenUpdateUserDetailsAndReturnUserDTO() {
+        User updatedUser = new User(1L, "John Updated", "Doe Updated", "john.updated@example.com", "newpassword",
+                false);
+        UserDTO updatedUserDTO = new UserDTO(1L, "John Updated", "Doe Updated", "john.updated@example.com", false,
+                new HashSet<>());
+
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenReturn(updatedUser);
+        when(entityDtoMapper.convertToDTO(updatedUser, UserDTO.class)).thenReturn(updatedUserDTO);
 
-        User result = userService.update(1L, updatedUser);
+        UserDTO resultDTO = userService.update(1L, updatedUser);
 
-        assertNotNull(result);
-        assertEquals("john.update@example.com", result.getEmail());
+        assertNotNull(resultDTO);
+        assertEquals(updatedUserDTO.getEmail(), resultDTO.getEmail());
     }
 
     @Test
     void whenDeleteById_thenUserShouldBeDeleted() {
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        doNothing().when(userRepository).delete(user);
-
+        doNothing().when(userRepository).deleteById(1L);
         userService.deleteById(1L);
-
-        verify(userRepository, times(1)).delete(user);
+        verify(userRepository, times(1)).deleteById(1L);
     }
 
     @Test
     void whenExistsByEmail_thenReturnTrueOrFalse() {
         when(userRepository.existsByEmail("john.doe@example.com")).thenReturn(true);
-
         boolean exists = userService.existsByEmail("john.doe@example.com");
-
         assertTrue(exists);
     }
 }

@@ -7,7 +7,6 @@ import static org.springframework.http.HttpStatus.*;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -49,13 +48,13 @@ public class RoleControllerTests {
         role = new Role(1L, "Admin");
         roleDTO = new RoleDTO(1L, "Admin");
         roleDTOList = Arrays.asList(roleDTO);
-        List<Role> roleList = roleDTOList.stream()
-                .map(dto -> new Role(dto.getId(), dto.getName()))
-                .collect(Collectors.toList());
-        when(roleService.findAll()).thenReturn(roleList);
-        when(roleService.findById(1L)).thenReturn(roleList.get(0));
-        when(roleService.save(any(Role.class))).thenReturn(roleList.get(0));
-        when(roleService.update(eq(1L), any(Role.class))).thenReturn(roleList.get(0));
+
+        when(roleService.findAll()).thenReturn(roleDTOList);
+        when(roleService.findById(1L)).thenReturn(roleDTO);
+
+        when(roleService.save(any(Role.class))).thenReturn(roleDTO);
+        when(roleService.update(eq(1L), any(Role.class))).thenReturn(roleDTO);
+
         when(bindingResult.hasErrors()).thenReturn(false);
     }
 
@@ -105,5 +104,5 @@ public class RoleControllerTests {
             assertEquals(NO_CONTENT, response.getStatusCode());
         }
     }
-    
+
 }

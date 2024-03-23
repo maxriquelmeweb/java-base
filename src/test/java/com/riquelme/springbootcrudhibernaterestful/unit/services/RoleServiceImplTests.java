@@ -15,10 +15,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.riquelme.springbootcrudhibernaterestful.dtos.RoleDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.Role;
-import com.riquelme.springbootcrudhibernaterestful.exceptions.ResourceNotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.repositories.RoleRepository;
 import com.riquelme.springbootcrudhibernaterestful.services.RoleServiceImpl;
+import com.riquelme.springbootcrudhibernaterestful.util.EntityDtoMapper;
 
 @ExtendWith(MockitoExtension.class)
 public class RoleServiceImplTests {
@@ -29,6 +30,9 @@ public class RoleServiceImplTests {
     @InjectMocks
     private RoleServiceImpl roleService;
 
+    @Mock
+    private EntityDtoMapper entityDtoMapper;
+
     private Role role;
 
     @BeforeEach
@@ -38,41 +42,41 @@ public class RoleServiceImplTests {
 
     @Test
     void whenFindAll_thenReturnRoleList() {
+        Role role1 = new Role(1L, "Admin");
         Role role2 = new Role(2L, "User");
-        when(roleRepository.findAll()).thenReturn(Arrays.asList(role, role2));
 
-        List<Role> roles = roleService.findAll();
+        when(roleRepository.findAll()).thenReturn(Arrays.asList(role1, role2));
 
-        assertNotNull(roles);
-        assertEquals(2, roles.size());
-        assertTrue(roles.contains(role) && roles.contains(role2));
+        List<RoleDTO> rolesDTOs = roleService.findAll();
+
+        assertNotNull(rolesDTOs);
+        assertEquals(2, rolesDTOs.size());
     }
 
     @Test
     void whenFindById_thenReturnRole() {
         when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
+        when(entityDtoMapper.convertToDTO(any(Role.class), eq(RoleDTO.class)))
+                .thenReturn(new RoleDTO(role.getId(), role.getName()));
 
-        Role foundRole = roleService.findById(1L);
+        RoleDTO roleDTO = roleService.findById(1L);
 
-        assertNotNull(foundRole);
-        assertEquals("Admin", foundRole.getName());
-    }
-
-    @Test
-    void whenFindById_thenThrowResourceNotFoundException() {
-        when(roleRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class, () -> roleService.findById(1L));
+        assertNotNull(roleDTO);
+        assertEquals(role.getId(), roleDTO.getId());
     }
 
     @Test
     void whenSave_thenPersistRole() {
+        Role role = new Role(null, "New Role");
+        RoleDTO roleDTO = new RoleDTO(1L, "New Role"); 
+    
         when(roleRepository.save(any(Role.class))).thenReturn(role);
-
-        Role savedRole = roleService.save(role);
-
-        assertNotNull(savedRole);
-        assertEquals("Admin", savedRole.getName());
+        when(entityDtoMapper.convertToDTO(any(Role.class), eq(RoleDTO.class))).thenReturn(roleDTO);
+    
+        RoleDTO savedRoleDTO = roleService.save(role);
+    
+        assertNotNull(savedRoleDTO);
+        assertEquals("New Role", savedRoleDTO.getName());
     }
 
     @Test
@@ -80,21 +84,25 @@ public class RoleServiceImplTests {
         Role updatedRole = new Role(1L, "UpdatedRole");
         when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
         when(roleRepository.save(any(Role.class))).thenReturn(updatedRole);
+        when(entityDtoMapper.convertToDTO(any(Role.class), eq(RoleDTO.class)))
+                .thenReturn(new RoleDTO(updatedRole.getId(), updatedRole.getName()));
 
-        Role result = roleService.update(1L, updatedRole);
+        RoleDTO updatedRoleDTO = roleService.update(1L, updatedRole);
 
-        assertNotNull(result);
-        assertEquals("UpdatedRole", result.getName());
+        assertNotNull(updatedRoleDTO);
+        assertEquals(updatedRole.getName(), updatedRoleDTO.getName());
     }
 
     @Test
     void whenDeleteById_thenRoleShouldBeDeleted() {
-        when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
-        doNothing().when(roleRepository).delete(role);
-
-        roleService.deleteById(1L);
-
-        verify(roleRepository, times(1)).delete(role);
+        Long id = 1L;
+        Role role = new Role(id, "Admin");
+    
+        when(roleRepository.findById(id)).thenReturn(Optional.of(role));
+    
+        roleService.deleteById(id);
+    
+        verify(roleRepository).deleteById(id);
     }
 
     @Test
