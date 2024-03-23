@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.riquelme.springbootcrudhibernaterestful.dtos.RoleIdsDTO;
 import com.riquelme.springbootcrudhibernaterestful.dtos.UserDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
 import com.riquelme.springbootcrudhibernaterestful.responses.MessageResponse;
@@ -83,5 +84,21 @@ public class UserController extends BaseController {
     public ResponseEntity<Void> deleteUser(@PathVariable @Min(1) Long id) {
         userService.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{userId}/roles")
+    public ResponseEntity<MessageResponse> addRolesToUser(@PathVariable @Min(1) Long userId,
+            @RequestBody RoleIdsDTO roleIdsDTO) {
+        User user = userService.addRolesToUser(userId, roleIdsDTO.getRoleIds());
+        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "user.addRoles.success",
+                EntityDtoMapper.convertToDTO(user, UserDTO.class), null));
+    }
+
+    @DeleteMapping("/{userId}/roles")
+    public ResponseEntity<MessageResponse> removeRolesFromUser(@PathVariable @Min(1) Long userId,
+            @RequestBody RoleIdsDTO roleIdsDTO) {
+        User user = userService.removeRolesFromUser(userId, roleIdsDTO.getRoleIds());
+        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "user.removeRoles.success",
+                EntityDtoMapper.convertToDTO(user, UserDTO.class), null));
     }
 }

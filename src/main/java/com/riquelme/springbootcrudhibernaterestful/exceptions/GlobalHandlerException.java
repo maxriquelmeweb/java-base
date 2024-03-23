@@ -23,8 +23,16 @@ public class GlobalHandlerException {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<MessageResponse> handleAllExceptions(Exception ex, WebRequest request) {
         LoggerUtil.error(ex.getMessage(), ex);
-        return new ResponseEntity<>(new MessageResponseImpl(messageSource, "general.error.message", null, null),
-                HttpStatus.INTERNAL_SERVER_ERROR);
+        HttpStatus statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+        String messageKey = "general.error.message";
+
+        // Aquí se revisa directamente la excepción y se cambia el estado HTTP a BAD_REQUEST
+        if (ex instanceof IllegalArgumentException) {
+            statusCode = HttpStatus.BAD_REQUEST;
+            messageKey = "role.error.notfound";
+        }
+        return new ResponseEntity<>(new MessageResponseImpl(messageSource, messageKey, null, null),
+                statusCode);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)

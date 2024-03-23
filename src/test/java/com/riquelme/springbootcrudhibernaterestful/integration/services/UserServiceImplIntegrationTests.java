@@ -15,8 +15,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.riquelme.springbootcrudhibernaterestful.entities.Role;
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
 import com.riquelme.springbootcrudhibernaterestful.exceptions.ResourceNotFoundException;
+import com.riquelme.springbootcrudhibernaterestful.repositories.RoleRepository;
 import com.riquelme.springbootcrudhibernaterestful.repositories.UserRepository;
 import com.riquelme.springbootcrudhibernaterestful.services.UserServiceImpl;
 
@@ -25,6 +27,8 @@ public class UserServiceImplIntegrationTests {
 
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private RoleRepository roleRepository;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -64,13 +68,28 @@ public class UserServiceImplIntegrationTests {
     @Test
     @Transactional
     void whenSave_thenPersistUser() {
-        User user = new User(null, "New User", "Lastname", "newuser@example.com", "password123", true);
-        when(userRepository.save(any(User.class))).thenReturn(user);
+        // Crear el rol "USER" y simular su recuperación
+        Role userRole = new Role(1L, "USER");
+        when(roleRepository.findById(1L)).thenReturn(Optional.of(userRole));
 
-        User savedUser = userService.save(user);
+        // Crear un nuevo usuario
+        User newUser = new User(null, "New User", "Lastname", "newuser@example.com", "password123", true);
 
+        // Simular la acción de guardar, que incluye la asignación del rol "USER"
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            user.getRoles().add(userRole);
+            return user;
+        });
+
+        // Invocar el método de guardar del servicio
+        User savedUser = userService.save(newUser);
+
+        // Verificar que el usuario se guardó correctamente y que se le asignó el rol
+        // "USER"
         assertNotNull(savedUser);
         assertEquals("New User", savedUser.getName());
+        assertTrue(savedUser.getRoles().contains(userRole), "The user should have the USER role assigned");
     }
 
     @Test
