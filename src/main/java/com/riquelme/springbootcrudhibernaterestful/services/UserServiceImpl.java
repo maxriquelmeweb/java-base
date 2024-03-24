@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,13 +29,15 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final EntityDtoMapper entityDtoMapper;
+    private final PasswordEncoder passwordEncoder;
     private static final int DEFAULT_ROL = 1;
 
     public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
-            EntityDtoMapper entityDtoMapper) {
+            EntityDtoMapper entityDtoMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.entityDtoMapper = entityDtoMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(readOnly = true)
@@ -60,6 +63,9 @@ public class UserServiceImpl implements UserService {
         // Buscar el rol "USER" por ID o nombre. Asumimos que el rol con ID 1 es "USER".
         Role userRole = roleRepository.findById(1L)
                 .orElseThrow(() -> new RoleNotFoundException("role.notDefaultRole.message"));
+        // Hashear la contraseña antes de guardar
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
         // Asignar el rol al nuevo usuario
         user.setRoles(new HashSet<>(Arrays.asList(userRole)));
         User newUser = userRepository.save(user);

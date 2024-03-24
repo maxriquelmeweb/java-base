@@ -25,8 +25,7 @@ abstract class BaseController {
                 .forEach(fieldError -> apiError.addFieldError(fieldError.getField(), fieldError.getDefaultMessage()));
         Map<String, String> details = apiError.getFieldErrors();
         MessageResponseImpl messageResponse = new MessageResponseImpl(messageSource, "handleValidationErrors.fails",
-                details,
-                null);
+                details);
         LoggerUtil.debug(messageResponse.getMessage(), details);
         return ResponseEntity.badRequest()
                 .body(messageResponse);

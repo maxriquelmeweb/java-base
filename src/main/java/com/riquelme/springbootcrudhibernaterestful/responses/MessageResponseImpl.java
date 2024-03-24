@@ -15,7 +15,7 @@ public class MessageResponseImpl implements MessageResponse {
         this.message = getMessage(messageKey);
     }
 
-    public MessageResponseImpl(MessageSource messageSource, String messageKey, Object data, Object[] args) {
+    public MessageResponseImpl(MessageSource messageSource, String messageKey, Object data) {
         this(messageSource, messageKey);
         this.data = data;
     }

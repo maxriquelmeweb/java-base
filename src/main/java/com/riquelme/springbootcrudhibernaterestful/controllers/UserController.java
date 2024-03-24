@@ -39,13 +39,13 @@ public class UserController extends BaseController {
     @GetMapping
     public ResponseEntity<MessageResponse> getUsers() {
         List<UserDTO> usersDTO = userService.findAll();
-        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "user.getUsers.success", usersDTO, null));
+        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "user.getUsers.success", usersDTO));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MessageResponse> getUser(@PathVariable @Min(1) Long id) {
         UserDTO userDTO = userService.findById(id);
-        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "user.getUser.success", userDTO, null));
+        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "user.getUser.success", userDTO));
     }
 
     @PostMapping
@@ -55,7 +55,7 @@ public class UserController extends BaseController {
         }
         UserDTO newUser = userService.save(user);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new MessageResponseImpl(messageSource, "user.createUser.success", newUser, null));
+                .body(new MessageResponseImpl(messageSource, "user.createUser.success", newUser));
     }
 
     @PutMapping("/{id}")
@@ -66,7 +66,7 @@ public class UserController extends BaseController {
         }
         UserDTO updateUserDTO = userService.update(id, user);
         return ResponseEntity
-                .ok(new MessageResponseImpl(messageSource, "user.updateUser.success", updateUserDTO, null));
+                .ok(new MessageResponseImpl(messageSource, "user.updateUser.success", updateUserDTO));
     }
 
     @DeleteMapping("/{id}")
@@ -79,13 +79,13 @@ public class UserController extends BaseController {
     public ResponseEntity<MessageResponse> addRolesToUser(@PathVariable @Min(1) Long userId,
             @RequestBody RoleIdsDTO roleIdsDTO) {
         UserDTO userDTO = userService.addRolesToUser(userId, roleIdsDTO.getRoleIds());
-        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "user.addRoles.success", userDTO, null));
+        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "user.addRoles.success", userDTO));
     }
 
     @DeleteMapping("/{userId}/roles")
     public ResponseEntity<MessageResponse> removeRolesFromUser(@PathVariable @Min(1) Long userId,
             @RequestBody RoleIdsDTO roleIdsDTO) {
         UserDTO userDTO = userService.removeRolesFromUser(userId, roleIdsDTO.getRoleIds());
-        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "user.removeRoles.success", userDTO, null));
+        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "user.removeRoles.success", userDTO));
     }
 }

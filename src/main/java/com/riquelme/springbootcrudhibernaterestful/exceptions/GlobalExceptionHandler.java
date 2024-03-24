@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.riquelme.springbootcrudhibernaterestful.exceptions.login.CustomDeserializationException;
 import com.riquelme.springbootcrudhibernaterestful.exceptions.role.DefaultRoleModificationException;
 import com.riquelme.springbootcrudhibernaterestful.exceptions.role.RoleNameAlreadyExistsException;
 import com.riquelme.springbootcrudhibernaterestful.exceptions.role.RoleNotAssignedToUserException;
@@ -40,6 +41,7 @@ public class GlobalExceptionHandler {
         exceptionResponses.put(RoleNameAlreadyExistsException.class, new ExceptionResponse(HttpStatus.CONFLICT, "role.existsByNameRole.message"));
         exceptionResponses.put(DefaultRoleModificationException.class, new ExceptionResponse(HttpStatus.FORBIDDEN, "role.default.modification.forbidden"));
         exceptionResponses.put(RoleNotAssignedToUserException.class, new ExceptionResponse(HttpStatus.BAD_REQUEST, "role.notassigned.message"));
+        exceptionResponses.put(CustomDeserializationException.class, new ExceptionResponse(HttpStatus.BAD_REQUEST, "user.deserialization.error"));
     }
 
     @ExceptionHandler(Exception.class)
