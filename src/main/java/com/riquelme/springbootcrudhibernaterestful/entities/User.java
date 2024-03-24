@@ -50,16 +50,15 @@ public class User {
 
     @NotBlank
     @Email
-    @ExistsByEmail() // Validación personalizada para verificar si el correo electrónico ya existe en
-                     // la base de datos.
-    @Size(min = 5, max = 100)
-    @Column(name = "email", nullable = false, length = 100, unique = true)
+    @ExistsByEmail()
+    @Size(min = 5, max = 255)
+    @Column(name = "email", nullable = false, length = 255, unique = true)
     private String email;
 
     @NotBlank
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) // Asegura que la contraseña no se serialice.
-    @Size(min = 5, max = 15)
-    @Column(name = "password", nullable = false, length = 250)
+    @Size(min = 5, max = 255)
+    @Column(name = "password", nullable = false, length = 255)
     private String password;
 
     @NotNull

@@ -39,7 +39,7 @@ public class RoleController extends BaseController {
     @GetMapping
     public ResponseEntity<MessageResponse> getRoles() {
         List<RoleDTO> rolesDTO = roleService.findAll();
-        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "role.getRoles.success", rolesDTO, null));
+        return ResponseEntity.ok(new MessageResponseImpl(messageSource, "role.getRoles.success", rolesDTO));
     }
 
     @Transactional
@@ -47,7 +47,7 @@ public class RoleController extends BaseController {
     public ResponseEntity<MessageResponse> getRole(@PathVariable @Min(1) Long id) {
         RoleDTO roleDTO = roleService.findById(id);
         return ResponseEntity
-                .ok(new MessageResponseImpl(messageSource, "role.getRole.success", roleDTO, null));
+                .ok(new MessageResponseImpl(messageSource, "role.getRole.success", roleDTO));
     }
 
     @Transactional
@@ -58,7 +58,7 @@ public class RoleController extends BaseController {
         }
         RoleDTO newRoleDTO = roleService.save(role);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new MessageResponseImpl(messageSource, "role.createRole.success", newRoleDTO, null));
+                .body(new MessageResponseImpl(messageSource, "role.createRole.success", newRoleDTO));
     }
 
     @Transactional
@@ -71,7 +71,7 @@ public class RoleController extends BaseController {
         }
         RoleDTO updatedRole = roleService.update(id, role);
         return ResponseEntity
-                .ok(new MessageResponseImpl(messageSource, "role.updateRole.success", updatedRole, null));
+                .ok(new MessageResponseImpl(messageSource, "role.updateRole.success", updatedRole));
     }
 
     @DeleteMapping("/{id}")

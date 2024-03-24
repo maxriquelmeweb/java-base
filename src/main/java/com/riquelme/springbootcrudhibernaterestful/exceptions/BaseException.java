@@ -8,6 +8,11 @@ public class BaseException extends RuntimeException {
         this.messageKey = messageKey;
     }
 
+    public BaseException(String messageKey, Throwable cause) {
+        super(messageKey, cause);
+        this.messageKey = messageKey;
+    }
+
     public String getMessageKey() {
         return messageKey;
     }
