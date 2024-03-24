@@ -3,17 +3,15 @@ package com.riquelme.springbootcrudhibernaterestful.services;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.riquelme.springbootcrudhibernaterestful.dtos.RoleDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.Role;
-import com.riquelme.springbootcrudhibernaterestful.exceptions.CustomException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.role.RoleNameAlreadyExistsException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.role.RoleNotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.repositories.RoleRepository;
 import com.riquelme.springbootcrudhibernaterestful.util.EntityDtoMapper;
-
-import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class RoleServiceImpl implements RoleService {
@@ -37,9 +35,9 @@ public class RoleServiceImpl implements RoleService {
 
     @Transactional(readOnly = true)
     @Override
-    public RoleDTO findById(Long id) {
+    public RoleDTO findById(Long id) throws RoleNotFoundException {
         Role roleDb = roleRepository.findById(id)
-                .orElseThrow(() -> new CustomException("role.error.notfound", new EntityNotFoundException()));
+                .orElseThrow(() -> new RoleNotFoundException("role.notfound.message"));
         return entityDtoMapper.convertToDTO(roleDb, RoleDTO.class);
     }
 
@@ -54,10 +52,9 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public RoleDTO update(Long id, Role role) {
         Role roleDb = roleRepository.findById(id)
-                .orElseThrow(() -> new CustomException("role.error.notfound", new EntityNotFoundException()));
-
+                .orElseThrow(() -> new RoleNotFoundException("role.notfound.message"));
         if (roleRepository.existsByName(role.getName())) {
-            throw new CustomException("existsByNameRole.message", new DataIntegrityViolationException(null));
+            throw new RoleNameAlreadyExistsException("role.existsByNameRole.message");
         }
         roleDb.setName(role.getName());
         Role updateRole = roleRepository.save(roleDb);
@@ -68,7 +65,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public void deleteById(Long id) {
         if (!roleRepository.existsById(id)) {
-            throw new CustomException("role.error.notfound", new EntityNotFoundException());
+            throw new RoleNotFoundException("role.notfound.message");
         }
         roleRepository.deleteById(id);
     }

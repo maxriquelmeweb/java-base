@@ -23,7 +23,7 @@ import com.riquelme.springbootcrudhibernaterestful.controllers.UserController;
 import com.riquelme.springbootcrudhibernaterestful.dtos.RoleIdsDTO;
 import com.riquelme.springbootcrudhibernaterestful.dtos.UserDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
-import com.riquelme.springbootcrudhibernaterestful.exceptions.CustomException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.user.UserNotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.repositories.UserRepository;
 import com.riquelme.springbootcrudhibernaterestful.responses.MessageResponse;
 import com.riquelme.springbootcrudhibernaterestful.services.UserService;
@@ -121,9 +121,9 @@ public class UserControllerTests {
             roleIdsDTO.setRoleIds(new HashSet<>(Arrays.asList(1L, 2L)));
 
             when(userService.addRolesToUser(eq(invalidUserId), anySet()))
-                    .thenThrow(new CustomException("user.error.notfound"));
+                    .thenThrow(new UserNotFoundException("user.notfound.message"));
 
-            Exception exception = assertThrows(CustomException.class, () -> {
+            Exception exception = assertThrows(UserNotFoundException.class, () -> {
                 userController.addRolesToUser(invalidUserId, roleIdsDTO);
             });
 

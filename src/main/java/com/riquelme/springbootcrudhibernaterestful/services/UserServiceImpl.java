@@ -7,19 +7,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.riquelme.springbootcrudhibernaterestful.dtos.UserDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.Role;
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
-import com.riquelme.springbootcrudhibernaterestful.exceptions.CustomException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.role.DefaultRoleModificationException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.role.RoleNameAlreadyExistsException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.role.RoleNotFoundException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.user.UserNotFoundException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.user.UserRoleNotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.repositories.RoleRepository;
 import com.riquelme.springbootcrudhibernaterestful.repositories.UserRepository;
 import com.riquelme.springbootcrudhibernaterestful.util.EntityDtoMapper;
-
-import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -49,7 +50,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO findById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new CustomException("user.error.notfound", new EntityNotFoundException()));
+                .orElseThrow(() -> new UserNotFoundException("user.notfound.message"));
         return entityDtoMapper.convertToDTO(user, UserDTO.class);
     }
 
@@ -58,7 +59,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO save(User user) {
         // Buscar el rol "USER" por ID o nombre. Asumimos que el rol con ID 1 es "USER".
         Role userRole = roleRepository.findById(1L)
-                .orElseThrow(() -> new CustomException("role.notDefaultRole.message", new EntityNotFoundException()));
+                .orElseThrow(() -> new RoleNotFoundException("role.notDefaultRole.message"));
         // Asignar el rol al nuevo usuario
         user.setRoles(new HashSet<>(Arrays.asList(userRole)));
         User newUser = userRepository.save(user);
@@ -69,7 +70,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO update(Long id, User user) {
         User userDb = userRepository.findById(id)
-                .orElseThrow(() -> new CustomException("user.error.notfound", new EntityNotFoundException()));
+                .orElseThrow(() -> new UserNotFoundException("user.notfound.message"));
         userDb.setName(user.getName());
         userDb.setLastname(user.getLastname());
         userDb.setEmail(user.getEmail());
@@ -86,7 +87,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteById(Long id) {
         if (!userRepository.existsById(id)) {
-            throw new CustomException("user.error.notfound", new EntityNotFoundException());
+            throw new UserNotFoundException("user.notfound.message");
         }
         userRepository.deleteById(id);
     }
@@ -101,16 +102,16 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDTO addRolesToUser(Long userId, Set<Long> roleIds) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException("user.error.notfound", new EntityNotFoundException()));
+                .orElseThrow(() -> new UserNotFoundException("user.notfound.message"));
         Set<Role> existingRoles = user.getRoles();
         Set<Role> rolesToAdd = roleIds.stream()
                 .map(roleId -> roleRepository.findById(roleId)
-                        .orElseThrow(() -> new CustomException("role.error.notfound", new EntityNotFoundException())))
+                        .orElseThrow(() -> new RoleNotFoundException("role.notfound.message")))
                 .filter(newRole -> existingRoles.stream()
                         .noneMatch(existingRole -> existingRole.getId().equals(newRole.getId())))
                 .collect(Collectors.toSet());
         if (rolesToAdd.isEmpty()) {
-            throw new CustomException("existsByNameRole.message", new DataIntegrityViolationException(null));
+            throw new RoleNameAlreadyExistsException("role.existsByNameRole.message");
         }
         // Añadir nuevos roles al usuario
         user.getRoles().addAll(rolesToAdd);
@@ -122,21 +123,21 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDTO removeRolesFromUser(Long userId, Set<Long> roleIds) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException("user.error.notfound", new EntityNotFoundException()));
+                .orElseThrow(() -> new UserNotFoundException("user.notfound.message"));
 
         Set<Role> rolesToRemove = roleIds.stream()
                 .map(roleId -> roleRepository.findById(roleId)
-                        .orElseThrow(() -> new CustomException("role.error.notfound", new EntityNotFoundException())))
+                        .orElseThrow(() -> new RoleNotFoundException("role.notfound.message")))
                 .collect(Collectors.toSet());
 
         rolesToRemove.forEach(role -> {
             // Verificar que todos los roles a remover realmente pertenecen al usuario
             if (!user.getRoles().contains(role)) {
-                throw new CustomException("user.notContentRole.message", new IllegalArgumentException());
+                throw new UserRoleNotFoundException("user.role.notfound.message");
             }
             // No se permite borrar el rol por defecto al usuario
             if (role.getId() == DEFAULT_ROL) {
-                throw new CustomException("role.notRemoveDefaultRole.message", new IllegalArgumentException());
+                throw new DefaultRoleModificationException("role.default.modification.forbidden");
             }
         });
 

@@ -13,7 +13,7 @@ import jakarta.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExistsByNameRole {
 
-    String message() default "{existsByNameRole.message}";
+    String message() default "{role.existsByNameRole.message}";
 
     Class<?>[] groups() default {};
 
