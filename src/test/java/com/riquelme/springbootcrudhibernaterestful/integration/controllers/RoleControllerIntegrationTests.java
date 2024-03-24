@@ -25,7 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.riquelme.springbootcrudhibernaterestful.dtos.RoleDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.Role;
-import com.riquelme.springbootcrudhibernaterestful.exceptions.role.RoleNotFoundException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.NotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.services.RoleService;
 import com.riquelme.springbootcrudhibernaterestful.util.EntityDtoMapper;
 
@@ -87,7 +87,7 @@ public class RoleControllerIntegrationTests {
                 @Test
                 void whenGetRoleNotFound_thenReturns404() throws Exception {
                         when(roleService.findById(anyLong()))
-                                        .thenThrow(new RoleNotFoundException("role.notfound.message"));
+                                        .thenThrow(new NotFoundException("role.notfound.message"));
                         mockMvc.perform(get("/api/roles/999"))
                                         .andExpect(status().isNotFound())
                                         .andExpect(jsonPath("$.message", is(getMessage("role.notfound.message"))))

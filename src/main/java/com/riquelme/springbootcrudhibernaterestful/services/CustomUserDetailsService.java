@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
-import com.riquelme.springbootcrudhibernaterestful.exceptions.login.CustomUserNotFoundException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.NotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.repositories.UserRepository;
 
 @Service
@@ -25,7 +25,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomUserNotFoundException("user.notfound.message"));
+                .orElseThrow(() -> new NotFoundException("user.notfound.message"));
         return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(),
                 getAuthorities(user));
     }

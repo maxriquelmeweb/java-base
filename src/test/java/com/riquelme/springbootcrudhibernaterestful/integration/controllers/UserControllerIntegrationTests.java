@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.riquelme.springbootcrudhibernaterestful.dtos.RoleIdsDTO;
 import com.riquelme.springbootcrudhibernaterestful.dtos.UserDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
-import com.riquelme.springbootcrudhibernaterestful.exceptions.user.UserNotFoundException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.NotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.services.UserService;
 
 @SpringBootTest
@@ -102,7 +102,7 @@ public class UserControllerIntegrationTests {
                 @Test
                 void whenGetUserNotFound_thenReturns404() throws Exception {
                         when(userService.findById(anyLong()))
-                                        .thenThrow(new UserNotFoundException("user.notfound.message"));
+                                        .thenThrow(new NotFoundException("user.notfound.message"));
                         mockMvc.perform(get("/api/users/999"))
                                         .andExpect(status().isNotFound())
                                         .andExpect(jsonPath("$.message", is(getMessage("user.notfound.message"))))

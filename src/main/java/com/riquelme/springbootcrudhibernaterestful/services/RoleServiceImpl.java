@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.riquelme.springbootcrudhibernaterestful.dtos.RoleDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.Role;
-import com.riquelme.springbootcrudhibernaterestful.exceptions.role.RoleNameAlreadyExistsException;
-import com.riquelme.springbootcrudhibernaterestful.exceptions.role.RoleNotFoundException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.ExistsException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.NotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.repositories.RoleRepository;
 import com.riquelme.springbootcrudhibernaterestful.util.EntityDtoMapper;
 
@@ -35,9 +35,9 @@ public class RoleServiceImpl implements RoleService {
 
     @Transactional(readOnly = true)
     @Override
-    public RoleDTO findById(Long id) throws RoleNotFoundException {
+    public RoleDTO findById(Long id) throws NotFoundException {
         Role roleDb = roleRepository.findById(id)
-                .orElseThrow(() -> new RoleNotFoundException("role.notfound.message"));
+                .orElseThrow(() -> new NotFoundException("role.notfound.message"));
         return entityDtoMapper.convertToDTO(roleDb, RoleDTO.class);
     }
 
@@ -52,9 +52,9 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public RoleDTO update(Long id, Role role) {
         Role roleDb = roleRepository.findById(id)
-                .orElseThrow(() -> new RoleNotFoundException("role.notfound.message"));
+                .orElseThrow(() -> new NotFoundException("role.notfound.message"));
         if (roleRepository.existsByName(role.getName())) {
-            throw new RoleNameAlreadyExistsException("role.existsByNameRole.message");
+            throw new ExistsException("role.existsByNameRole.message");
         }
         roleDb.setName(role.getName());
         Role updateRole = roleRepository.save(roleDb);
@@ -65,7 +65,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public void deleteById(Long id) {
         if (!roleRepository.existsById(id)) {
-            throw new RoleNotFoundException("role.notfound.message");
+            throw new NotFoundException("role.notfound.message");
         }
         roleRepository.deleteById(id);
     }

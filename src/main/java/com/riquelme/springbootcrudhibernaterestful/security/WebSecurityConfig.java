@@ -8,7 +8,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -47,7 +46,20 @@ public class WebSecurityConfig {
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http.authorizeHttpRequests((authz) -> authz
+
+
+        return http
+        .authorizeHttpRequests(authz -> authz
+            .anyRequest().permitAll()) // Esto permite el acceso a todas las rutas
+        .addFilter(new JwtAuthenticationFilter(authenticationManager(), messageSource))
+        .addFilter(new JwtValidationFilter(authenticationManager()))
+        .csrf(csrf -> csrf.disable())
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .build();
+
+
+/*         return http.authorizeHttpRequests((authz) -> authz
                 .requestMatchers(HttpMethod.GET, "/api/users").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/roles").permitAll()
@@ -64,7 +76,7 @@ public class WebSecurityConfig {
                 .csrf(config -> config.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .build();
+                .build(); */
     }
 
     @Bean
