@@ -84,12 +84,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .compact();
 
         response.addHeader(HEADER_AUTHORIZATION, PREFIX_TOKEN + token);
-        Locale locale = request.getLocale();
-        String successMessage = messageSource.getMessage("auth.success", new Object[] { email }, locale);
         Map<String, String> body = new HashMap<>();
         body.put("token", token);
         body.put("email", email);
-        body.put("message", successMessage);
+        body.put("message", getMessageSource("auth.success"));
 
         response.getWriter().write(new ObjectMapper().writeValueAsString(body));
         response.setContentType(CONTENT_TYPE);
@@ -99,14 +97,16 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException failed) throws IOException, ServletException {
-        Locale locale = LocaleContextHolder.getLocale();
-        String failureMessage = messageSource.getMessage("auth.error", null, locale);
         Map<String, String> body = new HashMap<>();
-        body.put("message", failureMessage);
-        body.put("error", failed.getMessage());
+        body.put("message", getMessageSource("auth.error"));
+        body.put("error", getMessageSource("auth.badCredentials"));
         response.getWriter().write(new ObjectMapper().writeValueAsString(body));
         response.setStatus(401);
         response.setContentType(CONTENT_TYPE);
     }
 
+    private String getMessageSource(String messageKey){
+        Locale locale = LocaleContextHolder.getLocale();
+        return  messageSource.getMessage(messageKey, null, locale);
+    }
 }
