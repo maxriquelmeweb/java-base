@@ -17,7 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.riquelme.springbootcrudhibernaterestful.dtos.RoleDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.Role;
-import com.riquelme.springbootcrudhibernaterestful.exceptions.CustomException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.role.RoleNotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.repositories.RoleRepository;
 import com.riquelme.springbootcrudhibernaterestful.services.RoleServiceImpl;
 import com.riquelme.springbootcrudhibernaterestful.util.EntityDtoMapper;
@@ -103,10 +103,10 @@ public class RoleServiceImplTests {
     }
 
     @Test
-    void whenDeleteById_withNonExistingRole_thenThrowCustomException() {
+    void whenDeleteById_withNonExistingRole_thenThrowRoleNotFoundException() {
         Long id = 1L;
         when(roleRepository.existsById(id)).thenReturn(false);
-        assertThrows(CustomException.class, () -> roleService.deleteById(id));
+        assertThrows(RoleNotFoundException.class, () -> roleService.deleteById(id));
         verify(roleRepository, never()).deleteById(id);
     }
 

@@ -50,7 +50,8 @@ public class User {
 
     @NotBlank
     @Email
-    @ExistsByEmail() // Validación personalizada para verificar si el correo electrónico ya existe en la base de datos.
+    @ExistsByEmail() // Validación personalizada para verificar si el correo electrónico ya existe en
+                     // la base de datos.
     @Size(min = 5, max = 100)
     @Column(name = "email", nullable = false, length = 100, unique = true)
     private String email;
@@ -79,14 +80,12 @@ public class User {
 
     @PrePersist
     public void prePersist() {
-        // Establece createdAt y updatedAt a la fecha y hora actual antes de persistir.
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
     public void preUpdate() {
-        // Actualiza updatedAt a la fecha y hora actual antes de actualizar.
         updatedAt = LocalDateTime.now();
     }
 
@@ -181,8 +180,7 @@ public class User {
     @Override
     public String toString() {
         return "User [id=" + id + ", name=" + name + ", lastname=" + lastname + ", email=" + email + ", password="
-                + password + ", active=" + active + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt
-                + ", roles=" + roles + "]";
+                + password + ", active=" + active + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", roles="
+                + roles + "]";
     }
-
 }

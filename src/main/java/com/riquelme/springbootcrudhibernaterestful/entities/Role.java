@@ -52,14 +52,12 @@ public class Role {
 
     @PrePersist
     public void prePersist() {
-        // Establece createdAt y updatedAt a la fecha y hora actual antes de persistir.
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
     public void preUpdate() {
-        // Actualiza updatedAt a la fecha y hora actual antes de actualizar.
         updatedAt = LocalDateTime.now();
     }
 

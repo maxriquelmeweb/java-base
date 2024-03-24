@@ -13,7 +13,7 @@ import jakarta.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExistsByEmail {
 
-    String message() default "{existsByEmail.message}";
+    String message() default "{user.email.exists.message}";
 
     Class<?>[] groups() default {};
 
