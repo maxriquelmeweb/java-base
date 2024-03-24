@@ -14,6 +14,12 @@ public class LoggerUtil {
         }
     }
 
+    public static void debug(String msg, Map<String, String> details) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("{}: {}", msg, mapToString(details));
+        }
+    }
+
     public static void info(String msg) {
         if (logger.isInfoEnabled()) {
             logger.info(msg);
@@ -23,12 +29,6 @@ public class LoggerUtil {
     public static void warn(String msg) {
         if (logger.isWarnEnabled()) {
             logger.warn(msg);
-        }
-    }
-
-    public static void debug(String msg, Map<String, String> details) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("{}: {}", msg, mapToString(details));
         }
     }
 

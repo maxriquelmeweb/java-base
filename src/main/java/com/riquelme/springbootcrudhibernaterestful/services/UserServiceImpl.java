@@ -14,11 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.riquelme.springbootcrudhibernaterestful.dtos.UserDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.Role;
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
-import com.riquelme.springbootcrudhibernaterestful.exceptions.role.DefaultRoleModificationException;
-import com.riquelme.springbootcrudhibernaterestful.exceptions.role.RoleNameAlreadyExistsException;
-import com.riquelme.springbootcrudhibernaterestful.exceptions.role.RoleNotFoundException;
-import com.riquelme.springbootcrudhibernaterestful.exceptions.user.UserNotFoundException;
-import com.riquelme.springbootcrudhibernaterestful.exceptions.user.UserRoleNotFoundException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.DefaultModificationException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.ExistsException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.NotFoundException;
 import com.riquelme.springbootcrudhibernaterestful.repositories.RoleRepository;
 import com.riquelme.springbootcrudhibernaterestful.repositories.UserRepository;
 import com.riquelme.springbootcrudhibernaterestful.util.EntityDtoMapper;
@@ -53,7 +51,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO findById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("user.notfound.message"));
+                .orElseThrow(() -> new NotFoundException("user.notfound.message"));
         return entityDtoMapper.convertToDTO(user, UserDTO.class);
     }
 
@@ -62,7 +60,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO save(User user) {
         // Buscar el rol "USER" por ID o nombre. Asumimos que el rol con ID 1 es "USER".
         Role userRole = roleRepository.findById(1L)
-                .orElseThrow(() -> new RoleNotFoundException("role.notDefaultRole.message"));
+                .orElseThrow(() -> new NotFoundException("role.notDefaultRole.message"));
         // Hashear la contraseña antes de guardar
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
@@ -76,7 +74,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO update(Long id, User user) {
         User userDb = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("user.notfound.message"));
+                .orElseThrow(() -> new NotFoundException("user.notfound.message"));
         userDb.setName(user.getName());
         userDb.setLastname(user.getLastname());
         userDb.setEmail(user.getEmail());
@@ -93,7 +91,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteById(Long id) {
         if (!userRepository.existsById(id)) {
-            throw new UserNotFoundException("user.notfound.message");
+            throw new NotFoundException("user.notfound.message");
         }
         userRepository.deleteById(id);
     }
@@ -108,16 +106,16 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDTO addRolesToUser(Long userId, Set<Long> roleIds) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("user.notfound.message"));
+                .orElseThrow(() -> new NotFoundException("user.notfound.message"));
         Set<Role> existingRoles = user.getRoles();
         Set<Role> rolesToAdd = roleIds.stream()
                 .map(roleId -> roleRepository.findById(roleId)
-                        .orElseThrow(() -> new RoleNotFoundException("role.notfound.message")))
+                        .orElseThrow(() -> new NotFoundException("role.notfound.message")))
                 .filter(newRole -> existingRoles.stream()
                         .noneMatch(existingRole -> existingRole.getId().equals(newRole.getId())))
                 .collect(Collectors.toSet());
         if (rolesToAdd.isEmpty()) {
-            throw new RoleNameAlreadyExistsException("role.existsByNameRole.message");
+            throw new ExistsException("role.existsByNameRole.message");
         }
         // Añadir nuevos roles al usuario
         user.getRoles().addAll(rolesToAdd);
@@ -129,21 +127,21 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDTO removeRolesFromUser(Long userId, Set<Long> roleIds) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("user.notfound.message"));
+                .orElseThrow(() -> new NotFoundException("user.notfound.message"));
 
         Set<Role> rolesToRemove = roleIds.stream()
                 .map(roleId -> roleRepository.findById(roleId)
-                        .orElseThrow(() -> new RoleNotFoundException("role.notfound.message")))
+                        .orElseThrow(() -> new NotFoundException("role.notfound.message")))
                 .collect(Collectors.toSet());
 
         rolesToRemove.forEach(role -> {
             // Verificar que todos los roles a remover realmente pertenecen al usuario
             if (!user.getRoles().contains(role)) {
-                throw new UserRoleNotFoundException("user.role.notfound.message");
+                throw new NotFoundException("user.role.notfound.message");
             }
             // No se permite borrar el rol por defecto al usuario
             if (role.getId() == DEFAULT_ROL) {
-                throw new DefaultRoleModificationException("role.default.modification.forbidden");
+                throw new DefaultModificationException("role.default.modification.forbidden");
             }
         });
 
