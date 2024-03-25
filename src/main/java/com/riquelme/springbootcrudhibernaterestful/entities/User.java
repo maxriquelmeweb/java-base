@@ -24,6 +24,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /**
@@ -38,16 +39,19 @@ public class User {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Pattern(regexp = "^[a-zA-Z]+$", message = "{letters.only}")
     @NotBlank
     @Size(min = 2, max = 100)
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
+    @Pattern(regexp = "^[a-zA-Z]+$", message = "{letters.only}")
     @NotBlank
     @Size(min = 2, max = 100)
     @Column(name = "lastname", nullable = false, length = 100)
     private String lastname;
 
+    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$", message = "{email.invalid}")
     @NotBlank
     @Email
     @ExistsByEmail()

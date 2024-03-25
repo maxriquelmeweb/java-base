@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.riquelme.springbootcrudhibernaterestful.dtos.UserDTO;
 import com.riquelme.springbootcrudhibernaterestful.entities.Role;
@@ -23,7 +24,6 @@ import com.riquelme.springbootcrudhibernaterestful.repositories.RoleRepository;
 import com.riquelme.springbootcrudhibernaterestful.repositories.UserRepository;
 import com.riquelme.springbootcrudhibernaterestful.services.UserServiceImpl;
 import com.riquelme.springbootcrudhibernaterestful.util.EntityDtoMapper;
-
 @ExtendWith(MockitoExtension.class)
 public class UserServiceImplTests {
 
@@ -38,6 +38,9 @@ public class UserServiceImplTests {
 
     @InjectMocks
     private UserServiceImpl userService;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     private User user;
     private UserDTO userDTO;
