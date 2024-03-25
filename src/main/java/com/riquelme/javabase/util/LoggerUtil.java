@@ -47,7 +47,7 @@ public class LoggerUtil {
     private static String mapToString(Map<String, String> map) {
         StringBuilder sb = new StringBuilder();
         map.forEach((key, value) -> sb.append(key).append("=").append(value).append(", "));
-        if (sb.length() > 0) {
+        if (!sb.isEmpty()) {
             sb.delete(sb.length() - 2, sb.length()); // Remove the trailing comma and space
         }
         return sb.toString();

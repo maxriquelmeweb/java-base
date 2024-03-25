@@ -67,16 +67,16 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
             chain.doFilter(request, response);
         } catch (JwtException e) {
             Map<String, String> body = new HashMap<>();
-            body.put("error", getMessageSource("tokenJWT.error"));
+            body.put("error", getMessageSource());
             response.getWriter().write(new ObjectMapper().writeValueAsString(body));
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType(CONTENT_TYPE);
         }
     }
 
-    private String getMessageSource(String messageKey) {
+    private String getMessageSource() {
         Locale locale = LocaleContextHolder.getLocale();
-        return messageSource.getMessage(messageKey, null, locale);
+        return messageSource.getMessage("tokenJWT.error", null, locale);
     }
 
 }

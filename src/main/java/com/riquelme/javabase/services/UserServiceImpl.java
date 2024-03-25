@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO findById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("user.notfound.message"));
+                .orElseThrow(() -> new NotFoundException("user.notFound.message"));
         return entityDtoMapper.convertToDTO(user, UserDTO.class);
     }
 
@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRoles(new HashSet<>(Set.of(roleRepository.findById(1L).orElseThrow(
-                () -> new NotFoundException("default.role.notfound.message")))));
+                () -> new NotFoundException("default.role.notFound.message")))));
         return entityDtoMapper.convertToDTO(userRepository.save(user), UserDTO.class);
     }
 
@@ -70,7 +70,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO update(Long id, User user) {
         User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("user.notfound.message"));
+                .orElseThrow(() -> new NotFoundException("user.notFound.message"));
 
         existingUser.setName(user.getName());
         existingUser.setLastname(user.getLastname());
@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteById(Long id) {
         if (!userRepository.existsById(id)) {
-            throw new NotFoundException("user.notfound.message");
+            throw new NotFoundException("user.notFound.message");
         }
         userRepository.deleteById(id);
     }
@@ -103,11 +103,11 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDTO addRolesToUser(Long userId, Set<Long> roleIds) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("user.notfound.message"));
+                .orElseThrow(() -> new NotFoundException("user.notFound.message"));
         Set<Role> existingRoles = user.getRoles();
         Set<Role> rolesToAdd = roleIds.stream()
                 .map(roleId -> roleRepository.findById(roleId)
-                        .orElseThrow(() -> new NotFoundException("role.notfound.message")))
+                        .orElseThrow(() -> new NotFoundException("role.notFound.message")))
                 .filter(newRole -> existingRoles.stream()
                         .noneMatch(existingRole -> existingRole.getId().equals(newRole.getId())))
                 .collect(Collectors.toSet());
@@ -124,17 +124,17 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDTO removeRolesFromUser(Long userId, Set<Long> roleIds) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("user.notfound.message"));
+                .orElseThrow(() -> new NotFoundException("user.notFound.message"));
 
         Set<Role> rolesToRemove = roleIds.stream()
                 .map(roleId -> roleRepository.findById(roleId)
-                        .orElseThrow(() -> new NotFoundException("role.notfound.message")))
+                        .orElseThrow(() -> new NotFoundException("role.notFound.message")))
                 .collect(Collectors.toSet());
 
         rolesToRemove.forEach(role -> {
             // Verificar que todos los roles a remover realmente pertenecen al usuario
             if (!user.getRoles().contains(role)) {
-                throw new NotFoundException("user.role.notfound.message");
+                throw new NotFoundException("user.role.notFound.message");
             }
             // No se permite borrar el rol por defecto al usuario
             if (role.getId() == DEFAULT_ROL) {

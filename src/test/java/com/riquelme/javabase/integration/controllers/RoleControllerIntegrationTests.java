@@ -91,12 +91,12 @@ public class RoleControllerIntegrationTests {
                 @Test
                 void whenGetRoleNotFound_thenReturns404() throws Exception {
                         when(roleService.findById(anyLong()))
-                                        .thenThrow(new NotFoundException("role.notfound.message"));
+                                        .thenThrow(new NotFoundException("role.notFound.message"));
                         mockMvc.perform(get("/api/roles/999")
                                         .with(user("admin").roles("ADMIN")) // Simula un usuario autenticado con rol
                                         .contentType(MediaType.APPLICATION_JSON))
                                         .andExpect(status().isNotFound())
-                                        .andExpect(jsonPath("$.message", is(getMessage("role.notfound.message"))))
+                                        .andExpect(jsonPath("$.message", is(getMessage("role.notFound.message"))))
                                         .andExpect(jsonPath("$.data").doesNotExist());
                 }
         }

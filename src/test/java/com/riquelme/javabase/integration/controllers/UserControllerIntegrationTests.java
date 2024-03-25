@@ -107,12 +107,12 @@ public class UserControllerIntegrationTests {
                 @Test
                 void whenGetUserNotFound_thenReturns404() throws Exception {
                         when(userService.findById(anyLong()))
-                                        .thenThrow(new NotFoundException("user.notfound.message"));
+                                        .thenThrow(new NotFoundException("user.notFound.message"));
                         mockMvc.perform(get("/api/users/999")
                                         .with(user("admin").roles("ADMIN")) // Simula un usuario autenticado con rol
                                         .contentType(MediaType.APPLICATION_JSON))
                                         .andExpect(status().isNotFound())
-                                        .andExpect(jsonPath("$.message", is(getMessage("user.notfound.message"))))
+                                        .andExpect(jsonPath("$.message", is(getMessage("user.notFound.message"))))
                                         .andExpect(jsonPath("$.data").doesNotExist());
                 }
         }
