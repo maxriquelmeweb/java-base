@@ -24,8 +24,8 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException exc) throws IOException {
         Locale locale = LocaleContextHolder.getLocale();
-        String errorMessage = messageSource.getMessage("url.access.denied", null, locale);
-
+        String errorMessage = messageSource.getMessage("url.access.denied", null, locale) 
+                            + " - " + request.getRequestURI();
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType("application/json");
         response.getWriter().write(String.format("{\"error\": \"%s\"}", errorMessage));

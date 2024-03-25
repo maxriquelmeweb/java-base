@@ -43,13 +43,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<MessageResponse> handleException(Exception ex, Locale locale) {
         HttpStatus status = exceptionResponses.getOrDefault(ex.getClass(), HttpStatus.INTERNAL_SERVER_ERROR);
-        String messageKey = DEFAULT_MESSAGE_ERROR;
-        if (ex instanceof BaseException) {
-            messageKey = ((BaseException) ex).getMessageKey();
-        }
-        MessageResponseImpl messageResponseImpl = new MessageResponseImpl(messageSource, messageKey);
-        LoggerUtil.error(messageResponseImpl.getMessage(), ex);
-        return new ResponseEntity<>(messageResponseImpl, status);
+        String messageKey = ex instanceof BaseException ? ((BaseException) ex).getMessageKey() : DEFAULT_MESSAGE_ERROR;
+        MessageResponseImpl messageResponse = new MessageResponseImpl(messageSource, messageKey);
+        LoggerUtil.error(messageResponse.getMessage(), ex);
+        return new ResponseEntity<>(messageResponse, status);
     }
-
 }

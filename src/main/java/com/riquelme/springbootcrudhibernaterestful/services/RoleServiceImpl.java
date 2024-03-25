@@ -27,38 +27,38 @@ public class RoleServiceImpl implements RoleService {
     @Transactional(readOnly = true)
     @Override
     public List<RoleDTO> findAll() {
-        List<Role> roles = roleRepository.findAll();
-        return roles.stream()
+        return roleRepository.findAll().stream()
                 .map(role -> entityDtoMapper.convertToDTO(role, RoleDTO.class))
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     @Override
-    public RoleDTO findById(Long id) throws NotFoundException {
-        Role roleDb = roleRepository.findById(id)
+    public RoleDTO findById(Long id) {
+        Role role = roleRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("role.notfound.message"));
-        return entityDtoMapper.convertToDTO(roleDb, RoleDTO.class);
+        return entityDtoMapper.convertToDTO(role, RoleDTO.class);
     }
 
     @Transactional
     @Override
     public RoleDTO save(Role role) {
-        Role newRole = roleRepository.save(role);
-        return entityDtoMapper.convertToDTO(newRole, RoleDTO.class);
+        if (roleRepository.existsByName(role.getName())) {
+            throw new ExistsException("role.existsByNameRole.message");
+        }
+        return entityDtoMapper.convertToDTO(roleRepository.save(role), RoleDTO.class);
     }
 
     @Transactional
     @Override
     public RoleDTO update(Long id, Role role) {
-        Role roleDb = roleRepository.findById(id)
+        Role existingRole = roleRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("role.notfound.message"));
-        if (roleRepository.existsByName(role.getName())) {
+        if (!role.getName().equals(existingRole.getName()) && roleRepository.existsByName(role.getName())) {
             throw new ExistsException("role.existsByNameRole.message");
         }
-        roleDb.setName(role.getName());
-        Role updateRole = roleRepository.save(roleDb);
-        return entityDtoMapper.convertToDTO(updateRole, RoleDTO.class);
+        existingRole.setName(role.getName());
+        return entityDtoMapper.convertToDTO(roleRepository.save(existingRole), RoleDTO.class);
     }
 
     @Transactional

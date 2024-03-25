@@ -8,7 +8,6 @@ public class MessageResponseImpl implements MessageResponse {
     private MessageSource messageSource;
     private String message;
     private Object data;
-    private Object[] args;
 
     public MessageResponseImpl(MessageSource messageSource, String messageKey) {
         this.messageSource = messageSource;
@@ -31,7 +30,7 @@ public class MessageResponseImpl implements MessageResponse {
     }
 
     private String getMessage(String messageKey) {
-        return messageSource.getMessage(messageKey, args, "An unexpected error occurred.",
+        return messageSource.getMessage(messageKey, null, "{error.default}",
                 LocaleContextHolder.getLocale());
     }
 }
