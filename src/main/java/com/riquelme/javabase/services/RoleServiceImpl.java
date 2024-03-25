@@ -36,7 +36,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public RoleDTO findById(Long id) {
         Role role = roleRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("role.notfound.message"));
+                .orElseThrow(() -> new NotFoundException("role.notFound.message"));
         return entityDtoMapper.convertToDTO(role, RoleDTO.class);
     }
 
@@ -53,7 +53,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public RoleDTO update(Long id, Role role) {
         Role existingRole = roleRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("role.notfound.message"));
+                .orElseThrow(() -> new NotFoundException("role.notFound.message"));
         if (!role.getName().equals(existingRole.getName()) && roleRepository.existsByName(role.getName())) {
             throw new ExistsException("role.existsByNameRole.message");
         }
@@ -65,7 +65,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public void deleteById(Long id) {
         if (!roleRepository.existsById(id)) {
-            throw new NotFoundException("role.notfound.message");
+            throw new NotFoundException("role.notFound.message");
         }
         roleRepository.deleteById(id);
     }

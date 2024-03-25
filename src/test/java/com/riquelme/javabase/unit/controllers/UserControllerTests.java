@@ -121,7 +121,7 @@ public class UserControllerTests {
             roleIdsDTO.setRoleIds(new HashSet<>(Arrays.asList(1L, 2L)));
 
             when(userService.addRolesToUser(eq(invalidUserId), anySet()))
-                    .thenThrow(new NotFoundException("user.notfound.message"));
+                    .thenThrow(new NotFoundException("user.notFound.message"));
 
             Exception exception = assertThrows(NotFoundException.class, () -> {
                 userController.addRolesToUser(invalidUserId, roleIdsDTO);

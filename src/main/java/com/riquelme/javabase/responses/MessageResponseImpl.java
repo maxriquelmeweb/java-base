@@ -5,8 +5,8 @@ import org.springframework.context.i18n.LocaleContextHolder;
 
 public class MessageResponseImpl implements MessageResponse {
 
-    private MessageSource messageSource;
-    private String message;
+    private final MessageSource messageSource;
+    private final String message;
     private Object data;
 
     public MessageResponseImpl(MessageSource messageSource, String messageKey) {

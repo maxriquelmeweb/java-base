@@ -25,7 +25,6 @@ import com.riquelme.javabase.exceptions.jwt.CustomDeserializationException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -43,9 +42,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
-        User user = null;
-        String email = null;
-        String password = null;
+        User user;
+        String email;
+        String password;
 
         try {
             user = new ObjectMapper().readValue(request.getInputStream(), User.class);
@@ -63,7 +62,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
-            Authentication authResult) throws IOException, ServletException {
+            Authentication authResult) throws IOException {
 
         org.springframework.security.core.userdetails.User user = (org.springframework.security.core.userdetails.User) authResult
                 .getPrincipal();
@@ -96,7 +95,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-            AuthenticationException failed) throws IOException, ServletException {
+            AuthenticationException failed) throws IOException {
         Map<String, String> body = new HashMap<>();
         body.put("error", getMessageSource("auth.error"));
         response.getWriter().write(new ObjectMapper().writeValueAsString(body));
