@@ -20,7 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.riquelme.springbootcrudhibernaterestful.entities.User;
-import com.riquelme.springbootcrudhibernaterestful.exceptions.login.CustomDeserializationException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.jwt.CustomDeserializationException;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -98,8 +98,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException failed) throws IOException, ServletException {
         Map<String, String> body = new HashMap<>();
-        body.put("message", getMessageSource("auth.error"));
-        body.put("error", getMessageSource("auth.badCredentials"));
+        body.put("error", getMessageSource("auth.error"));
         response.getWriter().write(new ObjectMapper().writeValueAsString(body));
         response.setStatus(401);
         response.setContentType(CONTENT_TYPE);

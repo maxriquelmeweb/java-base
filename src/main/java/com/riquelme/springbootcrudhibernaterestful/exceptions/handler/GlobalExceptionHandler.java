@@ -1,4 +1,4 @@
-package com.riquelme.springbootcrudhibernaterestful.exceptions;
+package com.riquelme.springbootcrudhibernaterestful.exceptions.handler;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -10,7 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.riquelme.springbootcrudhibernaterestful.exceptions.login.CustomDeserializationException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.BaseException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.DefaultModificationException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.ExistsException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.NotAssignedException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.NotFoundException;
+import com.riquelme.springbootcrudhibernaterestful.exceptions.jwt.CustomDeserializationException;
 import com.riquelme.springbootcrudhibernaterestful.responses.MessageResponse;
 import com.riquelme.springbootcrudhibernaterestful.responses.MessageResponseImpl;
 import com.riquelme.springbootcrudhibernaterestful.util.LoggerUtil;
