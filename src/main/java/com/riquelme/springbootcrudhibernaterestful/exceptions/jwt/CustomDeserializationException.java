@@ -1,4 +1,4 @@
-package com.riquelme.springbootcrudhibernaterestful.exceptions.login;
+package com.riquelme.springbootcrudhibernaterestful.exceptions.jwt;
 
 import com.riquelme.springbootcrudhibernaterestful.exceptions.BaseException;
 

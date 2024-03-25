@@ -6,8 +6,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,8 +32,11 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class JwtValidationFilter extends BasicAuthenticationFilter {
 
-    public JwtValidationFilter(AuthenticationManager authenticationManager) {
+    private final MessageSource messageSource;
+
+    public JwtValidationFilter(AuthenticationManager authenticationManager, MessageSource messageSource) {
         super(authenticationManager);
+        this.messageSource = messageSource;
     }
 
     @Override
@@ -52,23 +58,25 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
 
             Collection<? extends GrantedAuthority> authorities = Arrays.asList(
                     new ObjectMapper()
-                .addMixIn(SimpleGrantedAuthority.class,
+                            .addMixIn(SimpleGrantedAuthority.class,
                                     SimpleGrantedAuthorityJsonCreator.class)
-                .readValue(authoritiesClaims.toString().getBytes(), SimpleGrantedAuthority[].class)
-                );
-
-            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, null, authorities);
-            SecurityContextHolder .getContext().setAuthentication(authenticationToken);
+                            .readValue(authoritiesClaims.toString().getBytes(), SimpleGrantedAuthority[].class));
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username,
+                    null, authorities);
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             chain.doFilter(request, response);
         } catch (JwtException e) {
             Map<String, String> body = new HashMap<>();
-            body.put("error", e.getMessage());
-            body.put("message", "El token JWT es invalido!");
-
+            body.put("error", getMessageSource("tokenJWT.error"));
             response.getWriter().write(new ObjectMapper().writeValueAsString(body));
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType(CONTENT_TYPE);
         }
+    }
+
+    private String getMessageSource(String messageKey) {
+        Locale locale = LocaleContextHolder.getLocale();
+        return messageSource.getMessage(messageKey, null, locale);
     }
 
 }
