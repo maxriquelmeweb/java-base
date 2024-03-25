@@ -1,7 +1,6 @@
 package com.riquelme.springbootcrudhibernaterestful.services;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,8 +40,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     @Override
     public List<UserDTO> findAll() {
-        List<User> users = userRepository.findAll();
-        return users.stream()
+        return userRepository.findAll().stream()
                 .map(user -> entityDtoMapper.convertToDTO(user, UserDTO.class))
                 .collect(Collectors.toList());
     }
@@ -58,33 +56,32 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserDTO save(User user) {
-        // Buscar el rol "USER" por ID o nombre. Asumimos que el rol con ID 1 es "USER".
-        Role userRole = roleRepository.findById(1L)
-                .orElseThrow(() -> new NotFoundException("role.notDefaultRole.message"));
-        // Hashear la contraseña antes de guardar
-        String encodedPassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(encodedPassword);
-        // Asignar el rol al nuevo usuario
-        user.setRoles(new HashSet<>(Arrays.asList(userRole)));
-        User newUser = userRepository.save(user);
-        return entityDtoMapper.convertToDTO(newUser, UserDTO.class);
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new ExistsException("user.email.exists.message");
+        }
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRoles(new HashSet<>(Set.of(roleRepository.findById(1L).orElseThrow(
+                () -> new NotFoundException("default.role.notfound.message")))));
+        return entityDtoMapper.convertToDTO(userRepository.save(user), UserDTO.class);
     }
 
     @Transactional
     @Override
     public UserDTO update(Long id, User user) {
-        User userDb = userRepository.findById(id)
+        User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("user.notfound.message"));
-        userDb.setName(user.getName());
-        userDb.setLastname(user.getLastname());
-        userDb.setEmail(user.getEmail());
-        userDb.setActive(user.getActive());
-        if (user.getPassword() != null) {
-            userDb.setPassword(user.getPassword());
+
+        existingUser.setName(user.getName());
+        existingUser.setLastname(user.getLastname());
+        existingUser.setEmail(user.getEmail());
+        existingUser.setActive(user.getActive());
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         }
-        userDb.setUpdatedAt(LocalDateTime.now());
-        User updateUser = userRepository.save(userDb);
-        return entityDtoMapper.convertToDTO(updateUser, UserDTO.class);
+        existingUser.setUpdatedAt(LocalDateTime.now());
+
+        return entityDtoMapper.convertToDTO(userRepository.save(existingUser), UserDTO.class);
     }
 
     @Transactional
