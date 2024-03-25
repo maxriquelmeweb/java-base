@@ -19,6 +19,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /**
@@ -33,6 +34,7 @@ public class Role {
     @Column(name = "id")
     private Long id;
 
+    @Pattern(regexp = "^[a-zA-Z]+$", message = "{letters.underscores.only}")
     @Size(min = 2, max = 50)
     @ExistsByNameRole() // Validación personalizada para verificar si el nombre del rol ya existe en la base de datos.
     @NotBlank
