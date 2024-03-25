@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.riquelme</groupId>
-	<artifactId>springboot-crud-hibernate-restful</artifactId>
+	<artifactId>javabase</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>springboot-crud-hibernate-restful</name>
-	<description>Demo project for Spring Boot</description>
+	<name>javabase</name>
+	<description>Java base rest</description>
 	<properties>
 		<java.version>21</java.version>
 	</properties>
