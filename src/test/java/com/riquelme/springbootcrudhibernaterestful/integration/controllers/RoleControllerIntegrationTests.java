@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -65,7 +66,9 @@ public class RoleControllerIntegrationTests {
 
                         when(roleService.findAll()).thenReturn(Arrays.asList(adminRoleDTO, userRoleDTO));
 
-                        mockMvc.perform(get("/api/roles"))
+                        mockMvc.perform(get("/api/roles")
+                                        .with(user("admin").roles("ADMIN")) // Simula un usuario autenticado con rol
+                                        .contentType(MediaType.APPLICATION_JSON))
                                         .andExpect(status().isOk())
                                         .andExpect(jsonPath("$.data", hasSize(2)))
                                         .andExpect(jsonPath("$.data[0].name", is("Admin")))
@@ -76,9 +79,10 @@ public class RoleControllerIntegrationTests {
                 @Test
                 void whenGetRole_thenReturnsRole() throws Exception {
                         RoleDTO roleDTO = new RoleDTO(1L, "Admin");
-
                         when(roleService.findById(1L)).thenReturn(roleDTO);
-                        mockMvc.perform(get("/api/roles/1"))
+                        mockMvc.perform(get("/api/roles/1")
+                                        .with(user("admin").roles("ADMIN")) // Simula un usuario autenticado con rol
+                                        .contentType(MediaType.APPLICATION_JSON))
                                         .andExpect(status().isOk())
                                         .andExpect(jsonPath("$.data.name", is(roleDTO.getName())))
                                         .andExpect(jsonPath("$.message", is(getMessage("role.getRole.success"))));
@@ -88,7 +92,9 @@ public class RoleControllerIntegrationTests {
                 void whenGetRoleNotFound_thenReturns404() throws Exception {
                         when(roleService.findById(anyLong()))
                                         .thenThrow(new NotFoundException("role.notfound.message"));
-                        mockMvc.perform(get("/api/roles/999"))
+                        mockMvc.perform(get("/api/roles/999")
+                                        .with(user("admin").roles("ADMIN")) // Simula un usuario autenticado con rol
+                                        .contentType(MediaType.APPLICATION_JSON))
                                         .andExpect(status().isNotFound())
                                         .andExpect(jsonPath("$.message", is(getMessage("role.notfound.message"))))
                                         .andExpect(jsonPath("$.data").doesNotExist());
@@ -102,6 +108,7 @@ public class RoleControllerIntegrationTests {
                         RoleDTO roleDTO = new RoleDTO(1L, "Admin");
                         when(roleService.save(any(Role.class))).thenReturn(roleDTO);
                         mockMvc.perform(post("/api/roles")
+                                        .with(user("admin").roles("ADMIN")) // Simula un usuario autenticado con rol
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content("{\"name\":\"Admin\"}"))
                                         .andExpect(status().isCreated())
@@ -112,11 +119,12 @@ public class RoleControllerIntegrationTests {
                 @Test
                 void whenCreateRoleWithValidationErrors_thenReturnsBadRequest() throws Exception {
                         mockMvc.perform(post("/api/roles")
+                                        .with(user("admin").roles("ADMIN")) // Simula un usuario autenticado con rol
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content("{\"name\":\"\"}"))
                                         .andExpect(status().isBadRequest())
                                         .andExpect(jsonPath("$.message",
-                                                        is(getMessage("handleValidationErrors.fails"))))
+                                                        is(getMessage("error.validation"))))
                                         .andExpect(jsonPath("$.data").exists());
                 }
 
@@ -125,6 +133,7 @@ public class RoleControllerIntegrationTests {
                         String roleName = "Admin";
                         when(roleService.existsByName(roleName)).thenReturn(true);
                         mockMvc.perform(post("/api/roles")
+                                        .with(user("admin").roles("ADMIN")) // Simula un usuario autenticado con rol
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content("{\"name\":\"" + roleName + "\"}"))
                                         .andExpect(status().isBadRequest())
@@ -142,6 +151,7 @@ public class RoleControllerIntegrationTests {
                         when(roleService.update(eq(1L), any(Role.class))).thenReturn(updatedRoleDTO);
 
                         mockMvc.perform(put("/api/roles/1")
+                                        .with(user("admin").roles("ADMIN")) // Simula un usuario autenticado con rol
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content("{\"name\":\"AdminUpdated\"}"))
                                         .andExpect(status().isOk())
@@ -155,7 +165,9 @@ public class RoleControllerIntegrationTests {
                 @Test
                 void whenDeleteRole_thenReturns204() throws Exception {
                         doNothing().when(roleService).deleteById(1L);
-                        mockMvc.perform(delete("/api/roles/1"))
+                        mockMvc.perform(delete("/api/roles/1")
+                                        .with(user("admin").roles("ADMIN")) // Aquí se simula el usuario autenticado
+                                        .contentType(MediaType.APPLICATION_JSON))
                                         .andExpect(status().isNoContent())
                                         .andExpect(jsonPath("$.data").doesNotExist());
                 }

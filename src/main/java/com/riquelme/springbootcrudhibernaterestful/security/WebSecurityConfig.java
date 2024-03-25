@@ -69,6 +69,7 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()));
         return http.build();
+        /* .anyRequest().permitAll()) */
     }
 
     @Bean
