@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,56 +35,57 @@ public class RoleServiceImplTests {
     @Mock
     private EntityDtoMapper entityDtoMapper;
 
-    private Role role;
+    private Role adminRole;
+    private Role userRole;
 
     @BeforeEach
     void setUp() {
-        role = new Role(1L, "Admin");
+        adminRole = new Role(1L, "Admin");
+        userRole = new Role(2L, "User");
     }
 
     @Test
+    @DisplayName("Find all roles returns a list of role DTOs")
     void whenFindAll_thenReturnRoleList() {
-        Role role1 = new Role(1L, "Admin");
-        Role role2 = new Role(2L, "User");
-
-        when(roleRepository.findAll()).thenReturn(Arrays.asList(role1, role2));
-
+        when(roleRepository.findAll()).thenReturn(Arrays.asList(adminRole, userRole));
         List<RoleDTO> rolesDTOs = roleService.findAll();
-
         assertNotNull(rolesDTOs);
         assertEquals(2, rolesDTOs.size());
     }
 
     @Test
+    @DisplayName("Find role by ID returns the correct role DTO")
     void whenFindById_thenReturnRole() {
-        when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
+        when(roleRepository.findById(1L)).thenReturn(Optional.of(adminRole));
         when(entityDtoMapper.convertToDTO(any(Role.class), eq(RoleDTO.class)))
-                .thenReturn(new RoleDTO(role.getId(), role.getName()));
+                .thenReturn(new RoleDTO(adminRole.getId(), adminRole.getName()));
 
         RoleDTO roleDTO = roleService.findById(1L);
 
         assertNotNull(roleDTO);
-        assertEquals(role.getId(), roleDTO.getId());
+        assertEquals(adminRole.getId(), roleDTO.getId());
     }
 
     @Test
+    @DisplayName("Save role persists the role and returns its DTO")
     void whenSave_thenPersistRole() {
-        Role role = new Role(null, "New Role");
-        RoleDTO roleDTO = new RoleDTO(1L, "New Role");
+        Role newRole = new Role(null, "New Role");
+        RoleDTO newRoleDTO = new RoleDTO(1L, "New Role");
 
-        when(roleRepository.save(any(Role.class))).thenReturn(role);
-        when(entityDtoMapper.convertToDTO(any(Role.class), eq(RoleDTO.class))).thenReturn(roleDTO);
+        when(roleRepository.save(any(Role.class))).thenReturn(newRole);
+        when(entityDtoMapper.convertToDTO(any(Role.class), eq(RoleDTO.class))).thenReturn(newRoleDTO);
 
-        RoleDTO savedRoleDTO = roleService.save(role);
+        RoleDTO savedRoleDTO = roleService.save(newRole);
 
         assertNotNull(savedRoleDTO);
         assertEquals("New Role", savedRoleDTO.getName());
     }
 
     @Test
+    @DisplayName("Update role changes role details")
     void whenUpdate_thenUpdateRoleDetails() {
         Role updatedRole = new Role(1L, "UpdatedRole");
-        when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
+        when(roleRepository.findById(1L)).thenReturn(Optional.of(adminRole));
         when(roleRepository.save(any(Role.class))).thenReturn(updatedRole);
         when(entityDtoMapper.convertToDTO(any(Role.class), eq(RoleDTO.class)))
                 .thenReturn(new RoleDTO(updatedRole.getId(), updatedRole.getName()));
@@ -95,6 +97,7 @@ public class RoleServiceImplTests {
     }
 
     @Test
+    @DisplayName("Delete role by ID removes the role")
     void whenDeleteById_thenRoleShouldBeDeleted() {
         Long id = 1L;
         when(roleRepository.existsById(id)).thenReturn(true);
@@ -103,6 +106,7 @@ public class RoleServiceImplTests {
     }
 
     @Test
+    @DisplayName("Delete non-existing role throws NotFoundException")
     void whenDeleteById_withNonExistingRole_thenThrowRoleNotFoundException() {
         Long id = 1L;
         when(roleRepository.existsById(id)).thenReturn(false);
@@ -111,11 +115,10 @@ public class RoleServiceImplTests {
     }
 
     @Test
+    @DisplayName("Check role existence by name")
     void whenExistsByName_thenReturnTrueOrFalse() {
         when(roleRepository.existsByName("Admin")).thenReturn(true);
-
         boolean exists = roleService.existsByName("Admin");
-
         assertTrue(exists);
     }
 }
