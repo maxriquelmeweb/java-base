@@ -8,41 +8,38 @@
         </encoder>
     </appender>
     
-    <!-- Appender para escribir en un archivo -->
+    <!-- Appender para escribir en un archivo con rotación basada en tamaño y tiempo -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/logGeneral.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <!-- Configuración de la política de rotación basada en tiempo y tamaño -->
             <fileNamePattern>logs/logGeneral.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <maxFileSize>10MB</maxFileSize> <!-- Tamaño máximo del archivo antes de la rotación -->
-            <maxHistory>30</maxHistory> <!-- Mantener solo los últimos 30 archivos -->
-            <totalSizeCap>300MB</totalSizeCap> <!-- Tamaño total máximo para todos los archivos de log -->
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>300MB</totalSizeCap>
         </rollingPolicy>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <!-- Appender para logging diario y dinámico -->
+    <!-- Appender para logging diario -->
     <appender name="DAILY" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- Configuración de la política de rotación diaria -->
             <fileNamePattern>logs/daily/day_%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxFileSize>10MB</maxFileSize> <!-- Tamaño máximo del archivo antes de la rotación -->
-            <maxHistory>30</maxHistory> <!-- Mantener solo los últimos 30 archivos -->
-            <totalSizeCap>300MB</totalSizeCap> <!-- Tamaño total máximo para todos los archivos de log -->
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>300MB</totalSizeCap>
         </rollingPolicy>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <!-- Logger específico para capturar ciertos mensajes -->
+    <!-- Logger específico -->
     <logger name="logger.log" level="DEBUG" additivity="false">
         <appender-ref ref="DAILY" />
     </logger>
 
-    <!-- Configuración del logger root que incluye todos los appenders -->
+    <!-- Configuración del logger root -->
     <root level="INFO">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE" />
