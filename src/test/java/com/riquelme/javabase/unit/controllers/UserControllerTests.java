@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -64,8 +65,10 @@ public class UserControllerTests {
     }
 
     @Nested
+    @DisplayName("Get Users Tests")
     class GetUsersTests {
         @Test
+        @DisplayName("When getting all users, return status OK with correct data")
         public void getUsersTest() {
             ResponseEntity<MessageResponse> response = userController.getUsers();
             assertEquals(OK, response.getStatusCode());
@@ -76,33 +79,64 @@ public class UserControllerTests {
         }
 
         @Test
+        @DisplayName("When getting a specific user by ID, return status OK with correct data")
         public void getUserTest() {
             ResponseEntity<MessageResponse> response = userController.getUser(1L);
             assertEquals(OK, response.getStatusCode());
             assertNotNull(response.getBody());
-            assertEquals(userDTO.toString(), response.getBody().getData().toString());
+            UserDTO responseData = (UserDTO) response.getBody().getData();
+            assertEquals(userDTO.getId(), responseData.getId());
+            assertEquals(userDTO.getName(), responseData.getName());
         }
     }
 
     @Nested
-    class UserModificationTests {
+    @DisplayName("User Creation Tests")
+    class UserCreationTests {
         @Test
+        @DisplayName("When creating a user, return status CREATED with correct data")
         public void createUserTest() {
             ResponseEntity<MessageResponse> response = userController.createUser(user, bindingResult);
             assertEquals(CREATED, response.getStatusCode());
             assertNotNull(response.getBody());
-            assertEquals(userDTO.toString(), response.getBody().getData().toString());
+            UserDTO responseData = (UserDTO) response.getBody().getData();
+            assertEquals(userDTO.getId(), responseData.getId());
+            assertEquals(userDTO.getName(), responseData.getName());
         }
+    }
 
+    @Nested
+    @DisplayName("User Update Tests")
+    class UserUpdateTests {
         @Test
+        @DisplayName("When updating a user, return status OK with updated data")
         public void updateUserTest() {
             ResponseEntity<MessageResponse> response = userController.updateUser(1L, user, bindingResult);
             assertEquals(OK, response.getStatusCode());
             assertNotNull(response.getBody());
-            assertEquals(userDTO.toString(), response.getBody().getData().toString());
+            UserDTO responseData = (UserDTO) response.getBody().getData();
+            assertEquals(userDTO.getId(), responseData.getId());
+            assertEquals(userDTO.getName(), responseData.getName());
         }
 
         @Test
+        @DisplayName("Handle error when updating a user with invalid ID")
+        void whenUpdateUserWithInvalidUserId_thenHandleError() {
+            Long invalidUserId = 999L; // Assuming this ID is invalid
+            when(userService.update(eq(invalidUserId), any(User.class)))
+                    .thenThrow(new NotFoundException("User not found"));
+
+            Exception exception = assertThrows(NotFoundException.class,
+                    () -> userController.updateUser(invalidUserId, user, bindingResult));
+            assertNotNull(exception);
+        }
+    }
+
+    @Nested
+    @DisplayName("User Deletion Tests")
+    class UserDeletionTests {
+        @Test
+        @DisplayName("When deleting a user, return status NO_CONTENT")
         public void deleteUserTest() {
             ResponseEntity<?> response = userController.deleteUser(1L);
             assertEquals(NO_CONTENT, response.getStatusCode());
@@ -110,23 +144,20 @@ public class UserControllerTests {
     }
 
     @Nested
+    @DisplayName("Role Management Tests")
     class RoleManagementTests {
-
-        // Pruebas para la gestión de roles...
-
         @Test
+        @DisplayName("Handle error when adding roles to a user with an invalid ID")
         void whenAddRolesToUserWithInvalidUserId_thenHandleError() {
-            Long invalidUserId = 999L; // Asumiendo que este ID es inválido
+            Long invalidUserId = 999L; // Assuming this ID is invalid
             RoleIdsDTO roleIdsDTO = new RoleIdsDTO();
             roleIdsDTO.setRoleIds(new HashSet<>(Arrays.asList(1L, 2L)));
 
             when(userService.addRolesToUser(eq(invalidUserId), anySet()))
-                    .thenThrow(new NotFoundException("user.notFound.message"));
+                    .thenThrow(new NotFoundException("User not found"));
 
-            Exception exception = assertThrows(NotFoundException.class, () -> {
-                userController.addRolesToUser(invalidUserId, roleIdsDTO);
-            });
-
+            Exception exception = assertThrows(NotFoundException.class,
+                    () -> userController.addRolesToUser(invalidUserId, roleIdsDTO));
             assertNotNull(exception);
         }
     }

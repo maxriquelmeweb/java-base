@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,6 +25,7 @@ import com.riquelme.javabase.repositories.RoleRepository;
 import com.riquelme.javabase.repositories.UserRepository;
 import com.riquelme.javabase.services.UserServiceImpl;
 import com.riquelme.javabase.util.EntityDtoMapper;
+
 @ExtendWith(MockitoExtension.class)
 public class UserServiceImplTests {
 
@@ -43,17 +45,20 @@ public class UserServiceImplTests {
     private PasswordEncoder passwordEncoder;
 
     private User user;
+    private User user2;
     private UserDTO userDTO;
 
     @BeforeEach
     void setUp() {
         user = new User(1L, "John", "Doe", "john.doe@example.com", "password", true);
-        userDTO = new UserDTO(1L, "John", "Doe", "john.doe@example.com", true, new HashSet<>());
+        user2 = new User(2L, "Jane", "Doe", "jane.doe@example.com", "password", true);
+        userDTO = new UserDTO(user.getId(), user.getName(), user.getLastname(), user.getEmail(), user.getActive(),
+                new HashSet<>());
     }
 
     @Test
+    @DisplayName("Find all users returns a list of user DTOs")
     void whenFindAll_thenReturnUserDTOList() {
-        User user2 = new User(2L, "Jane", "Doe", "jane.doe@example.com", "password", true);
         when(userRepository.findAll()).thenReturn(Arrays.asList(user, user2));
         when(entityDtoMapper.convertToDTO(any(User.class), eq(UserDTO.class)))
                 .thenAnswer(invocation -> {
@@ -71,6 +76,7 @@ public class UserServiceImplTests {
     }
 
     @Test
+    @DisplayName("Find user by ID returns the correct user DTO")
     void whenFindById_thenReturnUserDTO() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(entityDtoMapper.convertToDTO(user, UserDTO.class)).thenReturn(userDTO);
@@ -82,16 +88,14 @@ public class UserServiceImplTests {
     }
 
     @Test
+    @DisplayName("Save user persists the user and returns its DTO")
     void whenSave_thenPersistUserAndReturnUserDTO() {
-        // Preparar el rol "USER"
         Role userRole = new Role(1L, "USER");
         when(roleRepository.findById(1L)).thenReturn(Optional.of(userRole));
 
-        // Preparar el usuario para guardar
         User newUser = new User(null, "New User", "Lastname", "newuser@example.com", "password123", true);
         newUser.setRoles(new HashSet<>(Arrays.asList(userRole)));
 
-        // Simular la respuesta de guardar
         when(userRepository.save(any(User.class))).thenReturn(newUser);
         when(entityDtoMapper.convertToDTO(any(User.class), eq(UserDTO.class))).thenReturn(userDTO);
 
@@ -102,11 +106,12 @@ public class UserServiceImplTests {
     }
 
     @Test
+    @DisplayName("Update user changes user details")
     void whenUpdate_thenUpdateUserDetailsAndReturnUserDTO() {
         User updatedUser = new User(1L, "John Updated", "Doe Updated", "john.updated@example.com", "newpassword",
                 false);
-        UserDTO updatedUserDTO = new UserDTO(1L, "John Updated", "Doe Updated", "john.updated@example.com", false,
-                new HashSet<>());
+        UserDTO updatedUserDTO = new UserDTO(updatedUser.getId(), updatedUser.getName(), updatedUser.getLastname(),
+                updatedUser.getEmail(), updatedUser.getActive(), new HashSet<>());
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenReturn(updatedUser);
@@ -119,6 +124,7 @@ public class UserServiceImplTests {
     }
 
     @Test
+    @DisplayName("Delete user by ID removes the user")
     void whenDeleteById_thenUserShouldBeDeleted() {
         Long id = 1L;
         when(userRepository.existsById(id)).thenReturn(true);
@@ -127,6 +133,7 @@ public class UserServiceImplTests {
     }
 
     @Test
+    @DisplayName("Check user existence by email")
     void whenExistsByEmail_thenReturnTrueOrFalse() {
         when(userRepository.existsByEmail("john.doe@example.com")).thenReturn(true);
         boolean exists = userService.existsByEmail("john.doe@example.com");
