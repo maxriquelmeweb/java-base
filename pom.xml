@@ -5,14 +5,14 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.3</version>
+		<version>3.2.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.riquelme</groupId>
-	<artifactId>springboot-crud-hibernate-restful</artifactId>
+	<artifactId>javabase</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>springboot-crud-hibernate-restful</name>
-	<description>Demo project for Spring Boot</description>
+	<name>javabase</name>
+	<description>Java base rest</description>
 	<properties>
 		<java.version>21</java.version>
 	</properties>
@@ -42,6 +42,11 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -50,7 +55,6 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.13.2</version>
 			<scope>test</scope>
 		</dependency>
 		
@@ -59,6 +63,33 @@
 			<artifactId>mockito-core</artifactId>
 			<version>3.12.4</version>
 			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.modelmapper</groupId>
+			<artifactId>modelmapper</artifactId>
+			<version>3.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.12.5</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.12.5</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.12.5</version>
+			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
 
