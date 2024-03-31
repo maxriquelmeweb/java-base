@@ -34,3 +34,6 @@ build/
 
 ### logs ###
 /logs/
+
+### data prod ###
+/src/main/resources/data-prod.sql
