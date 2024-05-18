@@ -9,10 +9,9 @@
     </appender>
     
     <!-- Appender para escribir en un archivo con rotación basada en tamaño y tiempo -->
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/logGeneral.log</file>
+    <appender name="GENERAL" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>logs/logGeneral.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>logs/%i.General_%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>30</maxHistory>
             <totalSizeCap>300MB</totalSizeCap>
@@ -22,10 +21,11 @@
         </encoder>
     </appender>
 
-    <!-- Appender para logging diario -->
-    <appender name="DAILY" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/daily/day_%d{yyyy-MM-dd}.log</fileNamePattern>
+   <!-- Appender para escribir en un archivo con rotación basada en tamaño y tiempo -->
+    <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/%i.Error_%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
             <maxHistory>30</maxHistory>
             <totalSizeCap>300MB</totalSizeCap>
         </rollingPolicy>
@@ -36,13 +36,13 @@
 
     <!-- Logger específico -->
     <logger name="logger.log" level="DEBUG" additivity="false">
-        <appender-ref ref="DAILY" />
+        <appender-ref ref="ERROR" />
     </logger>
 
     <!-- Configuración del logger root -->
     <root level="INFO">
         <appender-ref ref="STDOUT" />
-        <appender-ref ref="FILE" />
+        <appender-ref ref="GENERAL" />
     </root>
 
 </configuration>
